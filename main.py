@@ -6,15 +6,18 @@ ECOSYSTEM EVOLUTION SIMULATOR
 pass
 
 
-# MAIN OBJECT
 class SIM:
 
-    def main(self):
+    pass
 
-        print("TEMP")
+
+# MAIN OBJECT
+def main():
+
+    # Main instance of simulation object
+    sim = SIM()
 
 
 # RUN
 if __name__ == "__main__":
-    obj = SIM()
-    obj.main()
+    main()
