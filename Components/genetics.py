@@ -5,15 +5,26 @@ Actions are associated with various properties within the ecosystem.
 """
 
 # IMPORTS
-pass
+import numpy as np
 
 
 # OBJECTS
 class GENE:
 
-    pass
+    def __init__(self):
+
+        # Constants
+        self.length = 10
+
+    def build(self) -> str:
+
+        # Random binary string
+        gene = "".join(np.random.randint(low=0, high=2, size=self.length).astype(str))
+
+        return gene
 
 
 # RUN
 if __name__ == "__main__":
     gene = GENE()
+    gene.build()
