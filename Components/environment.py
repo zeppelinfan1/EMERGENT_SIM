@@ -18,6 +18,32 @@ class Environment:
         # Feature constants
         self.holes = 20  # Number of holes throughout entire environment
 
+    def borders(self, dict, struct):
+
+        # Loop through each key
+        for key in dict.keys():
+
+            # Identify coordinated
+            y, x = np.where(struct == key)
+            y, x = y[0], x[0]
+
+            # Top border check
+            if (y - 1) < 0:
+                dict[key].append("TOP_BORDER")
+            # Bottom border check
+            if (y + 1) > self.length - 1:
+                dict[key].append("BOTTOM_BORDER")
+            # Left border check
+            if (x - 1) < 0:
+                dict[key].append("LEFT_BORDER")
+            # Right border check
+            if (x + 1) > self.width - 1:
+                dict[key].append("RIGHT_BORDER")
+
+            print(dict[key])
+
+        return dict
+
     def build(self):
 
         # Store space in numpy 2D array
@@ -25,12 +51,12 @@ class Environment:
         env_struct = arr.reshape(self.length, self.width)
 
         # Dictionary to store information about each individual square within environment
-        env_info_d = {key: None for key in list(arr)}
+        env_info_d = {key: [] for key in list(arr)}
 
         """ ADDING FEATURES
         """
         # Borders
-        pass
+        env_info_d = self.borders(env_info_d, env_struct)
 
         # Holes
         pass
