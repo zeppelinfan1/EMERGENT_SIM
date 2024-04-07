@@ -16,33 +16,42 @@ class Environment:
 
         self.length, self.width = length_units, width_units
         # Feature constants
-        self.holes = 20  # Number of holes throughout entire environment
+        self.num_holes = 20  # Number of holes throughout entire environment
 
-    def borders(self, dict, struct):
+    def borders(self, env_dict, struct):
 
         # Loop through each key
-        for key in dict.keys():
+        for key in env_dict.keys():
 
             # Identify coordinated
             y, x = np.where(struct == key)
             y, x = y[0], x[0]
 
             # Top border check
-            if (y - 1) < 0:
-                dict[key].append("TOP_BORDER")
+            if (y - 1) < 0: env_dict[key].append("BT")
             # Bottom border check
-            if (y + 1) > self.length - 1:
-                dict[key].append("BOTTOM_BORDER")
+            if (y + 1) > self.length - 1: env_dict[key].append("BB")
             # Left border check
-            if (x - 1) < 0:
-                dict[key].append("LEFT_BORDER")
+            if (x - 1) < 0: env_dict[key].append("BL")
             # Right border check
-            if (x + 1) > self.width - 1:
-                dict[key].append("RIGHT_BORDER")
+            if (x + 1) > self.width - 1: env_dict[key].append("BR")
 
-            print(dict[key])
+        return env_dict
 
-        return dict
+    def holes(self, env_dict):
+
+        holes = 0
+        while holes < self.num_holes:
+
+            # Pick random site
+            site_num = np.random.randint(low=0, high=len(env_dict) - 1)
+            # Ensure hole feature hasn't already been added
+            if "H" not in env_dict[site_num]:
+                # Add hole keyword "H"
+                env_dict[site_num].append("H")
+                holes += 1
+
+        return env_dict
 
     def build(self):
 
@@ -59,7 +68,9 @@ class Environment:
         env_info_d = self.borders(env_info_d, env_struct)
 
         # Holes
-        pass
+        env_info_d = self.holes(env_info_d)
+
+        return env_info_d
 
 # RUN
 if __name__ == "__main__":
