@@ -4,14 +4,27 @@ ECOSYSTEM EVOLUTION SIMULATOR
 
 # INITIAL CONSTANTS
 initial_pop = 200
-
+env_length = 100
+env_width = 100
 
 # IMPORTS
 import pandas as pd, numpy as np
+from Components.environment import Environment
 from Components.genetics import GENE
 
 
 # OBJECTS
+class SUBJECT:
+
+    def __init__(self, number: int):
+
+        # Id number
+        self.id_number = number
+
+        # Initializing neural network brain
+        pass
+
+
 class SIM:
 
     def __init__(self):
@@ -29,47 +42,40 @@ class SIM:
         # Components
         self.gene = GENE()
 
-    def build_pop(self, df: pd.DataFrame, number: int) -> None:
+    def build_pop(self, number: int) -> dict:
 
+        # Initial population dictionary
+        pop_dict = {}
         # Build individuals
-        for ind in range(number):
+        for id_num in range(number):
 
-            arr = self.build_ind()
+            # Subject object
+            subject = SUBJECT(id_num)
+            # Append to dictionary
+            pop_dict[id_num] = subject
 
-            # Append to main df
-            df = pd.concat(objs=[df, arr], ignore_index=True)
 
-        print(df)
-
-    def build_ind(self) -> pd.array:
-
-        # Random genetics
-        gene_list = []
-        for i in range(self.num_genes):
-
-            gene_list.append(self.gene.build())
-
-        # Random start coords
-        x = np.random.randint(0, self.width + 1)
-        y = np.random.randint(0, self.height + 1)
-
-        # Generate return array
-        arr = pd.DataFrame(data={"genetics": [",".join(gene_list)], "x_cord": [x], "y_cord": [y]})
-
-        return arr
+        return pop_dict
 
     def start(self) -> None:
 
-        # Build initial population
-        self.build_pop(df=pd.DataFrame(), number=initial_pop)
+        # Build environment
+        env_dict = Environment(env_length, env_width).build()
 
+        # Build initial population
+        pop_dict = self.build_pop(number=initial_pop)
+
+        for key_num in pop_dict.keys():
+
+            obj = pop_dict[key_num]
+            print(obj.id_number)
 
 # MAIN OBJECT
 def main():
 
     # Main instance of simulation object
     sim = SIM()
-    sim.build_pop(df=pd.DataFrame(columns=["genetics", "x_cord", "y_cord"]), number=initial_pop)
+    sim.start()
 
 
 # RUN
