@@ -13,18 +13,6 @@ from Components.subject import Subject
 
 
 # OBJECTS
-class SIM:
-
-    def __init__(self):
-
-        """SIMULATION ASPECTS
-        """
-        # Environment
-        self.env = Environment(length_units=env_length, width_units=env_width).build()
-        # Subjects
-        self.pop = build_pop(number=initial_pop)
-
-
 def build_pop(number: int) -> dict:
 
     # Initial population dictionary
@@ -38,6 +26,13 @@ def build_pop(number: int) -> dict:
         pop_dict[id_num] = subject
 
     return pop_dict
+
+
+class SIM:
+
+    env = Environment(length_units=env_length, width_units=env_width).build()
+    # Subjects
+    pop = build_pop(number=initial_pop)
 
 
 # MAIN OBJECT

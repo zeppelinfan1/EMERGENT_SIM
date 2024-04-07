@@ -9,9 +9,7 @@ import numpy as np
 # OBJECTS
 class Brain:
 
-    def __init__(self):
-
-        print("test")
+    pass
 
 
 # RUN
