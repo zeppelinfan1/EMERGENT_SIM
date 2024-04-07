@@ -8,7 +8,6 @@ env_length = 100
 env_width = 100
 
 # IMPORTS
-import pandas as pd, numpy as np
 from Components.environment import Environment
 from Components.subject import Subject
 
@@ -18,49 +17,40 @@ class SIM:
 
     def __init__(self):
 
-        """CONSTANTS
+        """SIMULATION ASPECTS
         """
-        # Population
-        self.pop_high = 200
-        self.pop_low = 100
-        # Individuals
-        self.num_genes = 10
         # Environment
-        self.height, self.width = 100, 100
+        self.env = Environment(length_units=env_length, width_units=env_width).build()
+        # Subjects
+        self.pop = build_pop(number=initial_pop)
 
-    def build_pop(self, number: int) -> dict:
 
-        # Initial population dictionary
-        pop_dict = {}
-        # Build individuals
-        for id_num in range(number):
+def build_pop(number: int) -> dict:
 
-            # Subject object
-            subject = Subject(id_num)
-            # Append to dictionary
-            pop_dict[id_num] = subject
+    # Initial population dictionary
+    pop_dict = {}
+    # Build individuals
+    for id_num in range(number):
 
-        return pop_dict
+        # Subject object
+        subject = Subject(id_num)
+        # Append to dictionary
+        pop_dict[id_num] = subject
 
-    def start(self) -> None:
+    return pop_dict
 
-        # Build environment
-        env_dict = Environment(env_length, env_width).build()
-
-        # Build initial population
-        pop_dict = self.build_pop(number=initial_pop)
-
-        for key_num in pop_dict.keys():
-
-            obj = pop_dict[key_num]
-            print(obj.id_number)
 
 # MAIN OBJECT
 def main():
 
     # Main instance of simulation object
     sim = SIM()
-    sim.start()
+
+    # Main loop
+    while True:
+
+        # Temporary
+        return
 
 
 # RUN
