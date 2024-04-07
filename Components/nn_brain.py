@@ -16,4 +16,4 @@ class Brain:
 
 # RUN
 if __name__ == "__main__":
-    obj = NN_BRAIN()
+    obj = Brain()

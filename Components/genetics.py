@@ -9,7 +9,7 @@ import numpy as np
 
 
 # OBJECTS
-class GENE:
+class Gene:
 
     def __init__(self):
 
@@ -26,5 +26,5 @@ class GENE:
 
 # RUN
 if __name__ == "__main__":
-    gene = GENE()
+    gene = Gene()
     gene.build()
