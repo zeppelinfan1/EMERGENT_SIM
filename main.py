@@ -10,21 +10,10 @@ env_width = 100
 # IMPORTS
 import pandas as pd, numpy as np
 from Components.environment import Environment
-from Components.genetics import GENE
+from Components.subject import Subject
 
 
 # OBJECTS
-class SUBJECT:
-
-    def __init__(self, number: int):
-
-        # Id number
-        self.id_number = number
-
-        # Initializing neural network brain
-        pass
-
-
 class SIM:
 
     def __init__(self):
@@ -39,9 +28,6 @@ class SIM:
         # Environment
         self.height, self.width = 100, 100
 
-        # Components
-        self.gene = GENE()
-
     def build_pop(self, number: int) -> dict:
 
         # Initial population dictionary
@@ -50,10 +36,9 @@ class SIM:
         for id_num in range(number):
 
             # Subject object
-            subject = SUBJECT(id_num)
+            subject = Subject(id_num)
             # Append to dictionary
             pop_dict[id_num] = subject
-
 
         return pop_dict
 
