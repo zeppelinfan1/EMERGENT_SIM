@@ -1,10 +1,10 @@
 """
 NEURAL NETWORK BRAIN
 """
-import cv2
 # IMPORTS
 import numpy as np
-import os, pickle, copy
+import os, cv2, pickle, copy
+
 
 # OBJECTS
 class Layer_Dense:
