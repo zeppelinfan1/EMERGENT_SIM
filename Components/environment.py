@@ -6,9 +6,10 @@ Step 1) Setup environment and 1st feature (holes)
 """
 
 # IMPORTS
-from dataclasses import dataclass, field
 import numpy as np
-
+import random
+from dataclasses import dataclass, field
+from Components.db_api import db_api
 
 # DATACLASSES
 @dataclass
@@ -49,8 +50,8 @@ class Square:
 
     id: int # Unique identifier
     terrain: TerrainType # Type of terrain
-    objects: field(default_factory=list) # Objects within square
     spatial: SpatialData # Square's position and neighboring squares (north, south, east, west)
+    objects: list = field(default_factory=list) # Objects within square
 
     last_id = 0
 
@@ -80,8 +81,66 @@ class Square:
 
         return True  # Character survived
 
+@dataclass
+class Environment:
+
+    width: int
+    height: int
+    default_terrain: float # How much of the terrain is land as opposed to alternatives (Holes)
+    squares: list = field(default_factory=list)
+
+    def __post_init__(self):
+
+        square_map = {}
+        # Start populating squares from the bottom right
+        for y in range(self.height):
+
+            for x in range(self.width):
+
+                pos = Position(x, y)
+                terrain_type = "LAND" if random.random() < self.default_terrain else "HOLE"
+                new_square = Square(id=0, terrain=terrain_type, spatial=SpatialData(position=pos))
+                self.squares.append(new_square)
+                square_map[(x, y)] = new_square
+
+        # Assign neighbors
+        for square in self.squares:
+            x, y = square.spatial.position.x, square.spatial.position.y
+            square.neighbors = {
+                "north": square_map.get((x, y + 1)),
+                "south": square_map.get((x, y - 1)),
+                "west": square_map.get((x - 1, y)),
+                "east": square_map.get((x + 1, y))
+            }
+
+    def get_square(self, x, y):
+
+        # Retrieve a square at the given (x, y) position.
+        for square in self.squares:
+
+            if square.spatial.position.x == x and square.spatial.position.y == y:
+
+                return square
+
+        return None  # Returns None if no square is found
+
+    def display(self):
+
+        # Prints the environment, showing 'H' for holes and 'L' for land
+        for y in reversed(range(self.height)):  # Print from top to bottom
+
+            row = []
+
+            for x in range(self.width):
+
+                square = self.get_square(x, y)
+                row.append("H" if square and square.terrain == "HOLE" else "L")  # H = Hole, L = Land
+
+            print(" ".join(row))
 
 
+env = Environment(15, 15, default_terrain=0.9)
+env.display()
 
 
 

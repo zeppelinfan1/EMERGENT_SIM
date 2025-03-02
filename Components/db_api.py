@@ -1,4 +1,5 @@
 import mysql.connector
+import json
 from Components.get_auth import get_auth
 
 
@@ -45,7 +46,7 @@ def squares_table_create(username: str="dchiappo", db: str="sim_db"):
         x INT NOT NULL,
         y INT NOT NULL,
         terrain VARCHAR(50) NOT NULL,
-        objects TEXT  -- Stores objects in JSON format (optional)
+        objects TEXT
     );
     """)
 
@@ -90,7 +91,23 @@ class db_api:
 
     def insert_square(self, x, y, terrain, objects=None):
 
-        pass
+        self.open_conn()
+
+        # Storing objects as json
+        obj_data = json.dumps(objects) if objects else "[]"
+
+        try:
+            self.cursor.execute("""
+                    INSERT INTO squares (x, y, terrain, objects)
+                    VALUES ({x}, {y}, {terrain}, {obj_data});
+                    """)
+            self.conn.commit()
+            print(f"Square at ({x}, {y}) added into db.")
+        except mysql.connector.Error as err:
+            print(f"Error inserting square: {err}")
+        finally:
+            self.cursor.close()
+            self.open_conn()  # Reopen cursor for next operation
 
     # Bulk update for all created squares
     def update_squares(self):
