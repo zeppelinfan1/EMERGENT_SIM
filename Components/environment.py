@@ -6,7 +6,89 @@ Step 1) Setup environment and 1st feature (holes)
 """
 
 # IMPORTS
+from dataclasses import dataclass, field
 import numpy as np
+
+
+# DATACLASSES
+@dataclass
+class TerrainType:
+
+    name: str
+    lethal: bool = False # Determines if stepping on this terrain results in death
+    movement_cost: int = 1 # Penalty for moving within terrain
+
+# Types of terrains
+LAND = TerrainType(name="LAND")
+HOLE = TerrainType(name="HOLE", lethal=True, movement_cost=999)
+
+@dataclass
+class Object:
+
+    name: str
+    interactable: bool = True # May pick up, drop or use the object
+    weight: int = 1
+
+@dataclass
+class Position:
+
+    x: int
+    y: int
+
+@dataclass
+class SpatialData:
+
+    position: Position
+    north: Position = None
+    south: Position = None
+    east: Position = None
+    west: Position = None
+
+@dataclass
+class Square:
+
+    id: int # Unique identifier
+    terrain: TerrainType # Type of terrain
+    objects: field(default_factory=list) # Objects within square
+    spatial: SpatialData # Square's position and neighboring squares (north, south, east, west)
+
+    last_id = 0
+
+    def __post_init__(self):
+
+        Square.last_id += 1
+        self.id = Square.last_id # Assigns unique value
+
+    def add_object(self, obj):
+
+        self.objects.append(obj)
+
+    def remove_object(self, obj):
+
+        if obj in self.objects:
+            self.objects.remove(obj)
+
+    def step_on(self, character):
+
+        if self.terrain.lethal:
+            print(f"{character} fell into {self.terrain.name} (ID: {self.id}) and died!")
+            return False
+        print(f"{character} stepped on {self.terrain.name} (ID: {self.id}).")
+
+        if self.objects:
+            print(f"They see: {', '.join(obj.name for obj in self.objects)}.")
+
+        return True  # Character survived
+
+
+
+
+
+
+
+
+
+
 
 
 # OBJECTS
