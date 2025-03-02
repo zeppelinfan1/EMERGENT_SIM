@@ -1,15 +1,15 @@
 import keyring
 
 
-def get_auth(address: str, username: str) -> (str, str):
+def get_auth(service_name: str, username: str) -> (str, str):
 
-    user_n, pass_w = keyring.get_password(service_name=address, username=username).split(".")
+    pwd = keyring.get_password(service_name, username)
 
-    return user_n, pass_w
+    return pwd
 
 
 # TESTING
 if __name__ == "__main__":
     # Log username/password combo
-    user, pwd = get_auth(address="my_credentials", username="log_db")
-    print(user, pwd)
+    pwd = get_auth(service_name="mysql", username="dchiappo")
+    print(pwd)
