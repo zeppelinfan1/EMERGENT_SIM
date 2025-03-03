@@ -40,10 +40,19 @@ class Position:
 class SpatialData:
 
     position: Position
-    north: Position = None
-    south: Position = None
-    east: Position = None
-    west: Position = None
+    north: object = None
+    south: object = None
+    east: object = None
+    west: object = None
+
+    def __repr__(self):
+
+        # Custom string representation to prevent infinite recursion
+        return f"SpatialData(pos=({self.position.x}, {self.position.y}), " \
+               f"N={self.north.spatial.position if self.north else None}, " \
+               f"S={self.south.spatial.position if self.south else None}, " \
+               f"E={self.east.spatial.position if self.east else None}, " \
+               f"W={self.west.spatial.position if self.west else None})"
 
 @dataclass
 class Square:
@@ -105,13 +114,12 @@ class Environment:
 
         # Assign neighbors
         for square in self.squares:
+
             x, y = square.spatial.position.x, square.spatial.position.y
-            square.neighbors = {
-                "north": square_map.get((x, y + 1)),
-                "south": square_map.get((x, y - 1)),
-                "west": square_map.get((x - 1, y)),
-                "east": square_map.get((x + 1, y))
-            }
+            square.spatial.north = square_map.get((x, y + 1))
+            square.spatial.south = square_map.get((x, y - 1))
+            square.spatial.west = square_map.get((x - 1, y))
+            square.spatial.east = square_map.get((x + 1, y))
 
     def get_square(self, x, y):
 
@@ -139,8 +147,8 @@ class Environment:
             print(" ".join(row))
 
 
-env = Environment(15, 15, default_terrain=0.9)
-env.display()
+env = Environment(25, 10, default_terrain=0.97)
+print(env.squares)
 
 
 
