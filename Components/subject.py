@@ -67,7 +67,8 @@ class Subject:
         self.genetics = Genetics(gene_number=self.gene_number, gene_length=self.gene_length)
 
 
-subject1 = Subject(gene_number=6, gene_length=10)
-print(subject1)
+if __name__ == "__main__":
+    subject1 = Subject(gene_number=6, gene_length=10)
+    print(subject1)
 
 

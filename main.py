@@ -1,52 +1,44 @@
 """
 ECOSYSTEM EVOLUTION SIMULATOR
 """
+MAX_ITERATIONS = 1
+ENV_HEIGHT = 50
+ENV_WIDTH = 100
+SUBJECT_NUM = 1
+SUBJECT_GENE_NUM = 8
+SUBJECT_GENE_LEN = 10
 
-# INITIAL CONSTANTS
-initial_pop = 200
-env_length = 100
-env_width = 100
 
 # IMPORTS
 from Components.environment import Environment
 from Components.subject import Subject
 
 
-# OBJECTS
-def build_pop(number: int) -> dict:
-
-    # Initial population dictionary
-    pop_dict = {}
-    # Build individuals
-    for id_num in range(number):
-
-        # Subject object
-        subject = Subject(id_num)
-        # Append to dictionary
-        pop_dict[id_num] = subject
-
-    return pop_dict
-
-
-class SIM:
-
-    env = Environment(length_units=env_length, width_units=env_width).build()
-    # Subjects
-    pop = build_pop(number=initial_pop)
-
-
 # MAIN OBJECT
 def main():
 
-    # Main instance of simulation object
-    sim = SIM()
+    # Initialize Environment
+    env = Environment(height=ENV_HEIGHT, width=ENV_HEIGHT, default_terrain=0.97)
 
-    # Main loop
-    while True:
+    # Populate subject into empty square
+    subject_d = {}
+    for _ in range(SUBJECT_NUM):
 
-        # Temporary
-        return
+        subject = Subject(gene_number=SUBJECT_GENE_NUM, gene_length=SUBJECT_GENE_LEN)
+        env.add_subject(subject)
 
+    # Start iterations
+    for i in range(MAX_ITERATIONS):
+
+        print(f"Iteration Number: {i}")
+        # Prepare perception training input
+        pass
+
+        # Train
+        pass
+
+        # Peform action
+        pass
 
 # RUN
 if __name__ == "__main__":
