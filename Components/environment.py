@@ -9,6 +9,7 @@ Step 1) Setup environment and 1st feature (holes)
 import numpy as np
 import random
 from dataclasses import dataclass, field
+from Components.subject import Subject
 from Components.db_api import db_api
 
 # DATACLASSES
@@ -61,6 +62,7 @@ class Square:
     terrain: TerrainType # Type of terrain
     spatial: SpatialData # Square's position and neighboring squares (north, south, east, west)
     objects: list = field(default_factory=list) # Objects within square
+    subject: Subject = None
 
     last_id = 0
 
