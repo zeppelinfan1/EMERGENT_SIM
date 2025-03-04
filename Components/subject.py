@@ -48,7 +48,7 @@ class Genetics:
     def __repr__(self):
 
         # Formats output
-        return f"Genetics(gene_number={self.gene_number}, gene_length={self.gene_length}, genes={self.genes})"
+        return f"Genetics(gene_number={self.gene_number}, gene_length={self.gene_length}, genes={self.genes}, mapping={self.mapping})"
 
 @dataclass
 class Subject:
@@ -68,6 +68,6 @@ class Subject:
 
 
 subject1 = Subject(gene_number=6, gene_length=10)
-print(subject1.genetics.mapping)
+print(subject1)
 
 
