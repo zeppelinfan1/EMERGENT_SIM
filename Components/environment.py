@@ -68,7 +68,6 @@ class Environment:
     width: int
     height: int
     default_terrain: float # How much of the terrain is land as opposed to alternatives (Holes)
-    squares: list = field(default_factory=list)
     square_map: dict = field(default_factory=dict)
 
     def __post_init__(self):
@@ -81,18 +80,12 @@ class Environment:
                 pos = Position(x, y)
                 terrain_type = "LAND" if random.random() < self.default_terrain else "HOLE"
                 new_square = Square(id=0, terrain=terrain_type, position=pos)
-                self.squares.append(new_square)
-                self.square_map[(x, y)] = new_square
-
-        # Assign neighbors
-        for square in self.squares:
-
-            x, y = square.position.x, square.position.y
+                self.square_map[(pos.x, pos.y)] = new_square
 
     def get_square(self, x, y):
 
         # Retrieve a square at the given (x, y) position.
-        for square in self.squares:
+        for square in self.square_map.values():
 
             if square.position.x == x and square.position.y == y:
 
@@ -103,14 +96,46 @@ class Environment:
     def get_random_square_subject(self):
 
         # Finds a random square that does not contain a subject
-        empty_squares = [square for square in self.squares if square.subject is None]
+        empty_squares = [square for square in self.square_map.values() if square.subject is None]
 
         return random.choice(empty_squares) if empty_squares else None
 
     def get_occupied_squares(self) -> list:
 
         # Returns a list of tuples (subject, square) for all subjects in the environment
-        return [square for square in self.squares if square.subject is not None]
+        return [square for square in self.square_map.values() if square.subject is not None]
+
+    def get_neighbors(self, position, perception_range) -> list:
+
+        neighbors = []
+        for dx in range(-perception_range, perception_range + 1):
+
+            for dy in range(-perception_range, perception_range + 1):
+
+                new_position = (position.x + dx, position.y + dy)  # ✅ Tuple format
+                square = self.square_map.get(new_position)  # ✅ Lookup using tuple
+                if square: neighbors.append(square)
+
+        return neighbors
+
+    def get_square_input_data(self, neighbors: list):
+
+        input_data = []
+
+        for square in neighbors:
+
+            terrain_encoding = [1, 0] if square.terrain == "LAND" else [0, 1] # One hot encoding for terrain - temporary
+            object_presence = [1] if square.objects else [0]
+            subject_presence = [1] if square.subject else [0]
+
+            # Combine into one row
+            square_features = terrain_encoding + object_presence + subject_presence
+            input_data.append(square_features)
+
+        # Convert into array
+        data_array = np.array(input_data)
+
+        return data_array
 
     def add_subject(self, subject):
 
@@ -136,5 +161,18 @@ class Environment:
 
 if __name__ == "__main__":
     env = Environment(25, 10, default_terrain=0.97)
-    env.display()
+    env.add_subject(Subject(5, 10))
+    occupied_squares = env.get_occupied_squares()
+    # For each subject
+    for occupied_square in occupied_squares:
+        square = occupied_square.position
+        # Prepare perception training input
+        neighboring_squares = env.get_neighbors(position=square, perception_range=1)  # Also includes square itself
+        neighbor_input_data = env.get_square_input_data(neighboring_squares)
+
+        # Train
+        pass
+
+        # Peform action
+        pass
 

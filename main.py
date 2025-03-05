@@ -7,6 +7,7 @@ ENV_WIDTH = 100
 SUBJECT_NUM = 2
 SUBJECT_GENE_NUM = 8
 SUBJECT_GENE_LEN = 10
+SUBJECT_PERCEPTION_RANGE = 1
 
 
 # IMPORTS
@@ -37,11 +38,11 @@ def main():
         for occupied_square in occupied_squares:
 
             square = occupied_square.position
-            print(square)
-            print(env.square_map)
-
             # Prepare perception training input
-            pass
+            neighboring_squares = env.get_neighbors(position=square, perception_range=SUBJECT_PERCEPTION_RANGE) # Also includes square itself
+            neighbor_input_data = env.get_square_input_data(neighboring_squares)
+
+            print(neighbor_input_data)
 
             # Train
             pass
