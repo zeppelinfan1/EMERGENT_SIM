@@ -36,8 +36,9 @@ def main():
         # For each subject
         for occupied_square in occupied_squares:
 
-            square = occupied_square.spatial
+            square = occupied_square.position
             print(square)
+            print(env.square_map)
 
             # Prepare perception training input
             pass

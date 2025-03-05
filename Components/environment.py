@@ -38,29 +38,11 @@ class Position:
     y: int
 
 @dataclass
-class SpatialData:
-
-    position: Position
-    north: object = None
-    south: object = None
-    east: object = None
-    west: object = None
-
-    def __repr__(self):
-
-        # Custom string representation to prevent infinite recursion
-        return f"SpatialData(pos=({self.position.x}, {self.position.y}), " \
-               f"N={self.north.spatial.position if self.north else None}, " \
-               f"S={self.south.spatial.position if self.south else None}, " \
-               f"E={self.east.spatial.position if self.east else None}, " \
-               f"W={self.west.spatial.position if self.west else None})"
-
-@dataclass
 class Square:
 
     id: int # Unique identifier
     terrain: TerrainType # Type of terrain
-    spatial: SpatialData # Square's position and neighboring squares (north, south, east, west)
+    position: Position # x, y coordinates
     objects: list = field(default_factory=list) # Objects within square
     subject: Subject = None
 
@@ -80,18 +62,6 @@ class Square:
         if obj in self.objects:
             self.objects.remove(obj)
 
-    def step_on(self, character):
-
-        if self.terrain.lethal:
-            print(f"{character} fell into {self.terrain.name} (ID: {self.id}) and died!")
-            return False
-        print(f"{character} stepped on {self.terrain.name} (ID: {self.id}).")
-
-        if self.objects:
-            print(f"They see: {', '.join(obj.name for obj in self.objects)}.")
-
-        return True  # Character survived
-
 @dataclass
 class Environment:
 
@@ -99,10 +69,10 @@ class Environment:
     height: int
     default_terrain: float # How much of the terrain is land as opposed to alternatives (Holes)
     squares: list = field(default_factory=list)
+    square_map: dict = field(default_factory=dict)
 
     def __post_init__(self):
 
-        square_map = {}
         # Start populating squares from the bottom right
         for y in range(self.height):
 
@@ -110,25 +80,21 @@ class Environment:
 
                 pos = Position(x, y)
                 terrain_type = "LAND" if random.random() < self.default_terrain else "HOLE"
-                new_square = Square(id=0, terrain=terrain_type, spatial=SpatialData(position=pos))
+                new_square = Square(id=0, terrain=terrain_type, position=pos)
                 self.squares.append(new_square)
-                square_map[(x, y)] = new_square
+                self.square_map[(x, y)] = new_square
 
         # Assign neighbors
         for square in self.squares:
 
-            x, y = square.spatial.position.x, square.spatial.position.y
-            square.spatial.north = square_map.get((x, y + 1))
-            square.spatial.south = square_map.get((x, y - 1))
-            square.spatial.west = square_map.get((x - 1, y))
-            square.spatial.east = square_map.get((x + 1, y))
+            x, y = square.position.x, square.position.y
 
     def get_square(self, x, y):
 
         # Retrieve a square at the given (x, y) position.
         for square in self.squares:
 
-            if square.spatial.position.x == x and square.spatial.position.y == y:
+            if square.position.x == x and square.position.y == y:
 
                 return square
 
@@ -141,7 +107,7 @@ class Environment:
 
         return random.choice(empty_squares) if empty_squares else None
 
-    def get_occupied_squares(self):
+    def get_occupied_squares(self) -> list:
 
         # Returns a list of tuples (subject, square) for all subjects in the environment
         return [square for square in self.squares if square.subject is not None]
