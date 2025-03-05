@@ -141,6 +141,11 @@ class Environment:
 
         return random.choice(empty_squares) if empty_squares else None
 
+    def get_occupied_squares(self):
+
+        # Returns a list of tuples (subject, square) for all subjects in the environment
+        return [square for square in self.squares if square.subject is not None]
+
     def add_subject(self, subject):
 
         square = self.get_random_square_subject()

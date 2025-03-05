@@ -4,7 +4,7 @@ ECOSYSTEM EVOLUTION SIMULATOR
 MAX_ITERATIONS = 1
 ENV_HEIGHT = 50
 ENV_WIDTH = 100
-SUBJECT_NUM = 1
+SUBJECT_NUM = 2
 SUBJECT_GENE_NUM = 8
 SUBJECT_GENE_LEN = 10
 
@@ -30,15 +30,23 @@ def main():
     # Start iterations
     for i in range(MAX_ITERATIONS):
 
+        # Get squares with active subjects
+        occupied_squares = env.get_occupied_squares()
         print(f"Iteration Number: {i}")
-        # Prepare perception training input
-        pass
+        # For each subject
+        for occupied_square in occupied_squares:
 
-        # Train
-        pass
+            square = occupied_square.spatial
+            print(square)
 
-        # Peform action
-        pass
+            # Prepare perception training input
+            pass
+
+            # Train
+            pass
+
+            # Peform action
+            pass
 
 # RUN
 if __name__ == "__main__":
