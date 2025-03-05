@@ -17,12 +17,11 @@ from Components.db_api import db_api
 class TerrainType:
 
     name: str
-    lethal: bool = False # Determines if stepping on this terrain results in death
-    movement_cost: int = 1 # Penalty for moving within terrain
+    energy_penalty: int = 0
 
 # Types of terrains
 LAND = TerrainType(name="LAND")
-HOLE = TerrainType(name="HOLE", lethal=True, movement_cost=999)
+HOLE = TerrainType(name="HOLE", energy_penalty=100)
 
 @dataclass
 class Object:

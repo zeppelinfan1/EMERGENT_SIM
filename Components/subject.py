@@ -56,6 +56,7 @@ class Subject:
     id: int = field(init=False)
     gene_number: int
     gene_length: int
+    energy: int = 100
     genetics: Genetics = field(init=False) # Created in post init
 
     last_subject = 0
