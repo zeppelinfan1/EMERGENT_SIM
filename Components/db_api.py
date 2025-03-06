@@ -1,5 +1,6 @@
 import mysql.connector
 import json
+import numpy as np
 from Components.get_auth import get_auth
 
 
@@ -55,7 +56,6 @@ def squares_table_create(username: str="dchiappo", db: str="sim_db"):
     cursor.close()
     conn.close()
 
-
 """OBJECTS
 """
 
@@ -88,6 +88,22 @@ class db_api:
         if self.conn:
             self.conn.close()
             print("Database connection closed.")
+
+    def create_hist_table(self, inputs, username: str = "dchiappo", db: str = "sim_db"):
+
+        self.open_conn()
+        # Delete existing table
+        self.cursor.execute("DROP TABLE IF EXISTS db_hist")
+        # Create based on inputs
+        self.cursor.execute(rf"""
+        CREATE TABLE IF NOT EXISTS db_hist (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            {", ".join([f"INPUT_{i} VARCHAR(255) NOT NULL" for i in range(len(inputs))])}
+        );
+        """)
+
+        print("Table 'squares' created successfully.")
+        self.close_conn()
 
     def insert_square(self, x, y, terrain, objects=None):
 
@@ -134,4 +150,7 @@ class db_api:
 """RUN
 """
 if __name__ == "__main__":
-    pass
+    db = db_api()
+    sample_input_list = [[0, 0, 0, 1], [1, 0, 0, 0], [0, 1, 0, 0]]
+    arr = np.array(sample_input_list)
+    db.create_hist_table(inputs=arr)
