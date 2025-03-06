@@ -40,9 +40,10 @@ def main():
             square = occupied_square.position
             # Prepare perception training input
             neighboring_squares = env.get_neighbors(position=square, perception_range=SUBJECT_PERCEPTION_RANGE) # Also includes square itself
-            neighbor_input_data = env.get_square_input_data(neighboring_squares)
+            input_data, target_data = env.get_training_data(neighboring_squares)
 
-            print(neighbor_input_data)
+            print(input_data)
+            print(target_data)
 
             # Train
             pass

@@ -117,15 +117,20 @@ class Environment:
 
         return neighbors
 
-    def get_square_input_data(self, neighbors: list):
+    def get_training_data(self, neighbors: list):
 
-        input_data = []
+        input_data = [] # Features of environment squares
+        target_data = [] # Survival criteria
 
         for square in neighbors:
 
             terrain_encoding = [1, 0] if square.terrain == "LAND" else [0, 1] # One hot encoding for terrain - temporary
             object_presence = [1] if square.objects else [0]
             subject_presence = [1] if square.subject else [0]
+            # Check for survival criteria
+            if square.subject and square.subject.energy == 0:
+                target_data.append(0)
+            else: target_data.append(1)
 
             # Combine into one row
             square_features = terrain_encoding + object_presence + subject_presence
@@ -133,8 +138,9 @@ class Environment:
 
         # Convert into array
         data_array = np.array(input_data)
+        target_array = np.array(target_data)
 
-        return data_array
+        return data_array, target_array
 
     def add_subject(self, subject):
 
@@ -167,7 +173,8 @@ if __name__ == "__main__":
         square = occupied_square.position
         # Prepare perception training input
         neighboring_squares = env.get_neighbors(position=square, perception_range=1)  # Also includes square itself
-        neighbor_input_data = env.get_square_input_data(neighboring_squares)
+        input_data, target_data = env.get_training_data(neighboring_squares)
+        print(input_data, target_data)
 
         # Train
         pass
