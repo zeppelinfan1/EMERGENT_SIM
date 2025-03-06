@@ -25,7 +25,9 @@ def main():
     subject_d = {}
     for _ in range(SUBJECT_NUM):
 
-        subject = Subject(gene_number=SUBJECT_GENE_NUM, gene_length=SUBJECT_GENE_LEN)
+        subject = Subject(gene_number=SUBJECT_GENE_NUM,
+                          gene_length=SUBJECT_GENE_LEN,
+                          perception=SUBJECT_PERCEPTION_RANGE)
         env.add_subject(subject)
 
     # Start iterations

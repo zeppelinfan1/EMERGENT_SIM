@@ -904,96 +904,40 @@ class Model:
         for layer in reversed(self.layers):
             layer.backward(layer.next.dvalues)
 
-# Using requests to download dataset and unzip
-def download_mnist_dataset(url, file, folder):
-
-    if not os.path.isfile(FILE):
-        print(f"Downloading {url} and saving as {file}...")
-        urllib.request.urlretrieve(url, file)
-
-        print("Unzipping images...")
-        with zipfile.ZipFile(file) as zip_images:
-            zip_images.extractall(folder)
-            print("Done!")
-
-# Loads a mnist dataset
-def load_mnist_dataset(dataset, path):
-
-    # Scan all the directories and create a list of labels
-    labels = os.listdir(os.path.join(path, dataset))
-
-    # Create lists for samples and labels
-    X = []
-    y = []
-
-    # For each label folder
-    for label in labels:
-
-        print(f"Collecting files with label: {label} for {dataset} data")
-        # And for each image in given folder
-        for file in os.listdir(os.path.join(path, dataset, label)):
-
-            # Read the image
-            image = cv2.imread(os.path.join(path, dataset, label, file), cv2.IMREAD_UNCHANGED)
-
-            # And append it and a label to the lists
-            X.append(image)
-            y.append(label)
-
-            # Convert the data to proper numpy arrays and return
-    return np.array(X), np.array(y).astype('uint8')
-
-
-# MNIST dataset (train + test)
-def create_data_mnist(path):
-
-    # Load both sets separately
-    X, y = load_mnist_dataset('train', path)
-    X_test, y_test = load_mnist_dataset('test', path)
-
-    # And return all the data
-    return X, y, X_test, y_test
-
-
-# Download
-# download_mnist_dataset(url=r"https://nnfs.io/datasets/fashion_mnist_images.zip",
-#                        file="fashion_mnist_images.zip",
-#                        folder="fashion_mnist_images")
-
-# Create dataset
-X, y, X_test, y_test = create_data_mnist(os.path.join(os.getcwd(), "fashion_mnist_images"))
-
-# Shuffle the training dataset
-keys = np.array(range(X.shape[0]))
-np.random.shuffle(keys)
-X = X[keys]
-y = y[keys]
-
-# Scale and reshape samples
-X = (X.reshape(X.shape[0], -1).astype(np.float16) - 127.5) / 127.5
-X_test = (X_test.reshape(X_test.shape[0], -1).astype(np.float16) - 127.5) / 127.5
-
-# Instantiate the model
-model = Model()
-
-# Add layers
-model.add(Layer_Dense(X.shape[1], 512, weight_regularizer_l2=5e-4, bias_regularizer_l2=5e-4))
-model.add(Activation_ReLU())
-model.add(Layer_Dense(512, 512))
-model.add(Activation_ReLU())
-model.add(Layer_Dropout(rate=0.1))
-model.add(Layer_Dense(512, 10))
-model.add(Activation_Softmax())
-
-# Set loss, optimizer and accuracy objects
-model.set(
-    loss=Loss_CategoricalCrossentropy(),
-    optimizer=Optimizer_Adam(decay=1e-7),
-    accuracy=Accuracy_Categorical()
-)
-
-# Finalize the model
-model.finalize()
-
-# Train the model
-model.train(X, y, validation_data=(X_test, y_test), epochs=10, batch_size=128, print_every=100)
+# # Create dataset
+# X, y, X_test, y_test = create_data_mnist(os.path.join(os.getcwd(), "fashion_mnist_images"))
+#
+# # Shuffle the training dataset
+# keys = np.array(range(X.shape[0]))
+# np.random.shuffle(keys)
+# X = X[keys]
+# y = y[keys]
+#
+# # Scale and reshape samples
+# X = (X.reshape(X.shape[0], -1).astype(np.float16) - 127.5) / 127.5
+# X_test = (X_test.reshape(X_test.shape[0], -1).astype(np.float16) - 127.5) / 127.5
+#
+# # Instantiate the model
+# model = Model()
+#
+# # Add layers
+# model.add(Layer_Dense(X.shape[1], 512, weight_regularizer_l2=5e-4, bias_regularizer_l2=5e-4))
+# model.add(Activation_ReLU())
+# model.add(Layer_Dense(512, 512))
+# model.add(Activation_ReLU())
+# model.add(Layer_Dropout(rate=0.1))
+# model.add(Layer_Dense(512, 10))
+# model.add(Activation_Softmax())
+#
+# # Set loss, optimizer and accuracy objects
+# model.set(
+#     loss=Loss_CategoricalCrossentropy(),
+#     optimizer=Optimizer_Adam(decay=1e-7),
+#     accuracy=Accuracy_Categorical()
+# )
+#
+# # Finalize the model
+# model.finalize()
+#
+# # Train the model
+# model.train(X, y, validation_data=(X_test, y_test), epochs=10, batch_size=128, print_every=100)

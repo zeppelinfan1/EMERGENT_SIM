@@ -2,6 +2,7 @@
 import numpy as np
 import random
 from dataclasses import dataclass, field
+import Components.nn_brain as nn
 
 
 # DATACLASSES
@@ -56,7 +57,9 @@ class Subject:
     id: int = field(init=False)
     gene_number: int
     gene_length: int
+    perception: int
     energy: int = 100
+    brain: nn.Model = field(init=False)
     genetics: Genetics = field(init=False) # Created in post init
 
     last_subject = 0
@@ -66,10 +69,37 @@ class Subject:
         Subject.last_subject += 1
         self.id = Subject.last_subject
         self.genetics = Genetics(gene_number=self.gene_number, gene_length=self.gene_length)
+        self.brain = self.initialize_brain()
+
+    def initialize_brain(self):
+
+        # Instantiate the model
+        brain = nn.Model()
+
+        # Add layers
+        brain.add(nn.Layer_Dense(self.perception, 512, weight_regularizer_l2=5e-4, bias_regularizer_l2=5e-4))
+        brain.add(nn.Activation_ReLU())
+        brain.add(nn.Layer_Dense(512, 512))
+        brain.add(nn.Activation_ReLU())
+        brain.add(nn.Layer_Dropout(rate=0.1))
+        brain.add(nn.Layer_Dense(512, 10))
+        brain.add(nn.Activation_Softmax())
+
+        # Set loss, optimizer and accuracy objects
+        brain.set(
+            loss=nn.Loss_CategoricalCrossentropy(),
+            optimizer=nn.Optimizer_Adam(decay=1e-7),
+            accuracy=nn.Accuracy_Categorical()
+        )
+
+        # Finalize
+        brain.finalize()
+
+        return brain
 
 
 if __name__ == "__main__":
-    subject1 = Subject(gene_number=6, gene_length=10)
+    subject1 = Subject(gene_number=6, gene_length=10, perception=9)
     print(subject1)
 
 

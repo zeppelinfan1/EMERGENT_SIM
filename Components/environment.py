@@ -166,7 +166,7 @@ class Environment:
 
 if __name__ == "__main__":
     env = Environment(25, 10, default_terrain=0.97)
-    env.add_subject(Subject(5, 10))
+    env.add_subject(Subject(5, 10, 9))
     occupied_squares = env.get_occupied_squares()
     # For each subject
     for occupied_square in occupied_squares:
@@ -175,6 +175,7 @@ if __name__ == "__main__":
         neighboring_squares = env.get_neighbors(position=square, perception_range=1)  # Also includes square itself
         input_data, target_data = env.get_training_data(neighboring_squares)
         print(input_data, target_data)
+        print(input_data.shape)
 
         # Train
         pass
