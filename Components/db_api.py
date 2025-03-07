@@ -1,6 +1,6 @@
 import mysql.connector
 import json
-import numpy as np
+import numpy as np, pandas as pd
 from Components.get_auth import get_auth
 
 
@@ -59,7 +59,7 @@ def squares_table_create(username: str="dchiappo", db: str="sim_db"):
 """OBJECTS
 """
 
-class db_api:
+class DB_API:
 
     def __init__(self, username: str="dchiappo", db: str="sim_db"):
 
@@ -98,7 +98,9 @@ class db_api:
         self.cursor.execute(rf"""
         CREATE TABLE IF NOT EXISTS db_hist (
             id INT AUTO_INCREMENT PRIMARY KEY,
-            {", ".join([f"INPUT_{i} VARCHAR(255) NOT NULL" for i in range(len(inputs))])}
+            subject_id INT,
+            {", ".join([f"input_{i} VARCHAR(255) NOT NULL" for i in range(inputs)])},
+            output VARCHAR(255)
         );
         """)
 
@@ -125,8 +127,7 @@ class db_api:
             self.cursor.close()
             self.open_conn()  # Reopen cursor for next operation
 
-    # Bulk update for all created squares
-    def update_squares(self):
+    def insert_hist(self, data):
 
         pass
 
@@ -137,6 +138,20 @@ class db_api:
         self.cursor.execute("SELECT * FROM squares")
 
         return self.cursor.fetchall()
+
+    def get_hist(self, subject_id):
+
+        self.open_conn()
+        # Query and retreive
+        query = "SELECT * FROM db_hist WHERE subject_id = %s;"
+        self.cursor.execute(query, (subject_id,))
+        hist = self.cursor.fetchall()
+        columns = [col[0] for col in self.cursor.description] # Get column names
+        self.close_conn()
+        # Convert to pandas df
+        df = pd.DataFrame(hist, columns=columns)
+
+        return df
 
     def truncate_squares(self):
 
@@ -150,7 +165,5 @@ class db_api:
 """RUN
 """
 if __name__ == "__main__":
-    db = db_api()
-    sample_input_list = [[0, 0, 0, 1], [1, 0, 0, 0], [0, 1, 0, 0]]
-    arr = np.array(sample_input_list)
-    db.create_hist_table(inputs=arr)
+    db = DB_API()
+    db.create_hist_table(inputs=3)

@@ -4,8 +4,6 @@ import random
 from dataclasses import dataclass, field
 import Components.nn_brain as nn
 
-
-# DATACLASSES
 @dataclass
 class Genetics:
 

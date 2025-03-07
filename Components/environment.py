@@ -1,16 +1,9 @@
-"""
-2D Space for individuals within the population to interact with
-various environmental features.
-
-Step 1) Setup environment and 1st feature (holes)
-"""
-
 # IMPORTS
 import numpy as np
 import random
 from dataclasses import dataclass, field
 from Components.subject import Subject
-from Components.db_api import db_api
+from Components.db_api import DB_API
 
 # DATACLASSES
 @dataclass
@@ -165,6 +158,7 @@ class Environment:
 
 
 if __name__ == "__main__":
+
     env = Environment(25, 10, default_terrain=0.97)
     env.add_subject(Subject(5, 10, 9))
     occupied_squares = env.get_occupied_squares()
