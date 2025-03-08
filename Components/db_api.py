@@ -99,6 +99,7 @@ class DB_API:
         CREATE TABLE IF NOT EXISTS db_hist (
             id INT AUTO_INCREMENT PRIMARY KEY,
             subject_id INT,
+            square_id INT,
             {", ".join([f"input_{i} VARCHAR(255) NOT NULL" for i in range(inputs)])},
             output VARCHAR(255)
         );
@@ -127,9 +128,26 @@ class DB_API:
             self.cursor.close()
             self.open_conn()  # Reopen cursor for next operation
 
-    def insert_hist(self, data):
+    def insert_hist(self, subject_id, square_id, feature_count, feature_data, target_data):
 
-        pass
+        self.open_conn()  # Ensure connection is open
+
+        # Prepare SQL statement
+        sql = f"""
+                INSERT INTO db_hist (subject_id, square_id, {", ".join([f"input_{i}" for i in range(feature_count)])}, output)
+                VALUES (%s, %s, %s, %s, %s, %s, %s)
+            """
+
+        records = [
+            tuple(map(int, [subject_id, square_id] + list(feature_row) + [target]))
+            for feature_row, target in zip(feature_data, target_data)
+        ]
+
+        # Execute batch insert
+        self.cursor.executemany(sql, records)
+
+        self.conn.commit()  # Save changes
+        self.close_conn()  # Close connection
 
     def get_squares(self):
 
