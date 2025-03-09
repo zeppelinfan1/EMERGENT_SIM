@@ -55,7 +55,7 @@ class Subject:
     id: int = field(init=False)
     gene_number: int
     gene_length: int
-    perception: int
+    features: int
     energy: int = 100
     brain: nn.Model = field(init=False)
     genetics: Genetics = field(init=False) # Created in post init
@@ -75,7 +75,7 @@ class Subject:
         brain = nn.Model()
 
         # Add layers
-        brain.add(nn.Layer_Dense(self.perception, 512, weight_regularizer_l2=5e-4, bias_regularizer_l2=5e-4))
+        brain.add(nn.Layer_Dense(self.features, 512, weight_regularizer_l2=5e-4, bias_regularizer_l2=5e-4))
         brain.add(nn.Activation_ReLU())
         brain.add(nn.Layer_Dense(512, 512))
         brain.add(nn.Activation_ReLU())
@@ -97,7 +97,7 @@ class Subject:
 
 
 if __name__ == "__main__":
-    subject1 = Subject(gene_number=6, gene_length=10, perception=9)
+    subject1 = Subject(gene_number=6, gene_length=10, features=4)
     print(subject1)
 
 

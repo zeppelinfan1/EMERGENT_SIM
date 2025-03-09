@@ -1,6 +1,7 @@
 """
 ECOSYSTEM EVOLUTION SIMULATOR
 """
+
 MAX_ITERATIONS = 1
 ENV_HEIGHT = 50
 ENV_WIDTH = 100
@@ -12,9 +13,10 @@ NN_FEATURE_COUNT = 4 # Terrain Land, Terrain Hole, Object Presence, Subject Pres
 
 
 # IMPORTS
-import pandas as pd
+import pandas as pd, numpy as np
 from Components.environment import Environment
 from Components.subject import Subject
+from Components.nn_brain import Model
 from Components.db_api import DB_API
 
 
@@ -33,7 +35,7 @@ def main():
 
         subject = Subject(gene_number=SUBJECT_GENE_NUM,
                           gene_length=SUBJECT_GENE_LEN,
-                          perception=SUBJECT_PERCEPTION_RANGE)
+                          features=NN_FEATURE_COUNT)
         env.add_subject(subject)
 
     # Start iterations
@@ -50,17 +52,16 @@ def main():
             # Prepare perception training input
             neighboring_squares = env.get_neighbors(position=square, perception_range=SUBJECT_PERCEPTION_RANGE) # Also includes square itself
             input_data, target_data = env.get_training_data(neighboring_squares)
-            # Query historical training data, append new
-            hist_df = db.get_hist(subject_id=subject.id)
+            # Append new historical data and then query to get final training data df
             db.insert_hist(subject_id=subject.id, square_id=occupied_square.id, feature_count=NN_FEATURE_COUNT,
                            feature_data=input_data, target_data=target_data)
-
-            print(db.get_hist(subject_id=subject.id))
-            # Combine
-            pass
+            training_df = db.get_hist(subject_id=subject.id)
 
             # Train
-            pass
+            X, y = training_df.iloc[:, 3:-1], training_df.iloc[:, -1]
+            X = np.array(X, dtype=int)
+            y = np.array(y, dtype=int)
+            subject.brain.train(X, y, epochs=10, batch_size=128, print_every=100)
 
             # Peform action
             pass
