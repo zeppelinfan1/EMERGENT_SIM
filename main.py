@@ -2,10 +2,10 @@
 ECOSYSTEM EVOLUTION SIMULATOR
 """
 
-MAX_ITERATIONS = 10
+MAX_ITERATIONS = 1
 ENV_HEIGHT = 50
 ENV_WIDTH = 100
-SUBJECT_NUM = 2
+SUBJECT_NUM = 1
 SUBJECT_GENE_NUM = 8
 SUBJECT_GENE_LEN = 10
 SUBJECT_PERCEPTION_RANGE = 1
@@ -61,10 +61,13 @@ def main():
             X, y = training_df.iloc[:, 3:-1], training_df.iloc[:, -1]
             X = np.array(X, dtype=int)
             y = np.array(y, dtype=int)
-            subject.brain.train(X, y, epochs=10, batch_size=128, print_every=100)
+            subject.brain.train(X, y, epochs=10, batch_size=128)
 
             # Peform action
-            pass
+            softmax_output = subject.brain.forward(X=X, training=None)
+            print(softmax_output)
+            best_move_index = np.argmax(softmax_output, axis=1)[0]  # Extract scalar value
+            print(best_move_index)
 
 # RUN
 if __name__ == "__main__":

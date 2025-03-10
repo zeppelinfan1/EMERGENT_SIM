@@ -79,7 +79,7 @@ class DB_API:
                 database=self.db
             )
             self.cursor = self.conn.cursor(dictionary=True)
-            print("Database connection opened.")
+            # print("Database connection opened.")
 
     def close_conn(self):
 
@@ -87,7 +87,7 @@ class DB_API:
             self.cursor.close()
         if self.conn:
             self.conn.close()
-            print("Database connection closed.")
+            # print("Database connection closed.")
 
     def create_hist_table(self, inputs, username: str = "dchiappo", db: str = "sim_db"):
 

@@ -785,7 +785,7 @@ class Model:
         for epoch in range(1, epochs + 1):
 
             # Print epoch number
-            print(f'epoch: {epoch}')
+            # print(f'epoch: {epoch}')
 
             # Reset accumulated values in loss and accuracy objects
             self.loss.new_pass()
@@ -825,17 +825,17 @@ class Model:
                 self.optimizer.post_update_params()
 
                 # Print a summary
-                if not step % print_every or step == train_steps - 1:
-                    print(
-                        f'step: {step}, acc: {accuracy:.3f}, loss: {loss:.3f} (data_loss: {data_loss:.3f}, reg_loss: {regularization_loss:.3f}), lr: {self.optimizer.current_learning_rate}')
+                # if not step % print_every or step == train_steps - 1:
+                #     print(
+                #         f'step: {step}, acc: {accuracy:.3f}, loss: {loss:.3f} (data_loss: {data_loss:.3f}, reg_loss: {regularization_loss:.3f}), lr: {self.optimizer.current_learning_rate}')
 
             # Get and print epoch loss and accuracy
             epoch_data_loss, epoch_regularization_loss = self.loss.calculate_accumulated(include_regularization=True)
             epoch_loss = epoch_data_loss + epoch_regularization_loss
             epoch_accuracy = self.accuracy.calculate_accumulated()
 
-            print(
-                f'training, acc: {epoch_accuracy:.3f}, loss: {epoch_loss:.3f} (data_loss: {epoch_data_loss:.3f}, reg_loss: {epoch_regularization_loss:.3f}), lr: {self.optimizer.current_learning_rate}')
+            # print(
+            #     f'training, acc: {epoch_accuracy:.3f}, loss: {epoch_loss:.3f} (data_loss: {epoch_data_loss:.3f}, reg_loss: {epoch_regularization_loss:.3f}), lr: {self.optimizer.current_learning_rate}')
 
             # If there is the validation data
             if validation_data is not None:
@@ -872,7 +872,7 @@ class Model:
                 validation_accuracy = self.accuracy.calculate_accumulated()
 
                 # Print a summary
-                print(f'validation, acc: {validation_accuracy:.3f}, loss: {validation_loss:.3f}')
+                # print(f'validation, acc: {validation_accuracy:.3f}, loss: {validation_loss:.3f}')
 
     # Performs forward pass
     def forward(self, X, training):

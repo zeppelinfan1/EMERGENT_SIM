@@ -80,7 +80,7 @@ class Subject:
         brain.add(nn.Layer_Dense(512, 512))
         brain.add(nn.Activation_ReLU())
         brain.add(nn.Layer_Dropout(rate=0.1))
-        brain.add(nn.Layer_Dense(512, 10))
+        brain.add(nn.Layer_Dense(512, 9))
         brain.add(nn.Activation_Softmax())
 
         # Set loss, optimizer and accuracy objects
