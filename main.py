@@ -2,7 +2,7 @@
 ECOSYSTEM EVOLUTION SIMULATOR
 """
 
-MAX_ITERATIONS = 1
+MAX_ITERATIONS = 10
 ENV_HEIGHT = 50
 ENV_WIDTH = 100
 SUBJECT_NUM = 1
@@ -65,9 +65,30 @@ def main():
 
             # Peform action
             softmax_output = subject.brain.forward(X=X, training=None)
-            print(softmax_output)
-            best_move_index = np.argmax(softmax_output, axis=1)[0]  # Extract scalar value
-            print(best_move_index)
+            max_value = np.max(softmax_output, axis=1, keepdims=True)
+            best_indices = np.where(softmax_output == max_value)[1]
+            best_move_index = np.random.choice(best_indices) # Random choice if tied
+            # New positional data
+            dx, dy = env.get_movement_delta(best_move_index)
+            # Get subject's current position
+            new_x = occupied_square.position.x + dx
+            new_y = occupied_square.position.y + dy
+            # Ensure the move is within bounds
+            if env.check_is_within_bounds(new_x, new_y):
+
+                # Find the new square
+                new_square = env.get_square(new_x, new_y)
+                # Ensure the square is not occupied before moving
+                if new_square and new_square.subject is None:
+                    # Move subject to new square
+                    occupied_square.subject = None  # Remove subject from old square
+                    new_square.subject = subject  # Assign subject to new square
+                    print(f"Subject moved to ({new_x}, {new_y}).")
+                else:
+                    print(f"Square ({new_x}, {new_y}) is occupied, staying in place.")
+            else:
+                print(f"Move out of bounds: ({new_x}, {new_y}) - Staying in place")
+
 
 # RUN
 if __name__ == "__main__":

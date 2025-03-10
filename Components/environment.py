@@ -61,6 +61,11 @@ class Environment:
     height: int
     default_terrain: float # How much of the terrain is land as opposed to alternatives (Holes)
     square_map: dict = field(default_factory=dict)
+    movement_map = {
+        0: (-1, -1), 1: (-1, 0), 2: (-1, 1),
+        3: (0, -1), 4: (0, 0), 5: (0, 1),
+        6: (1, -1), 7: (1, 0), 8: (1, 1)
+    }
 
     def __post_init__(self):
 
@@ -84,6 +89,11 @@ class Environment:
                 return square
 
         return None  # Returns None if no square is found
+
+    def get_movement_delta(self, move_index: int):
+
+        # Retrieve (dx, dy) movement from index
+        return self.movement_map.get(move_index, (0, 0))  # Default to no movement
 
     def get_random_square_subject(self):
 
@@ -134,6 +144,11 @@ class Environment:
         target_array = np.array(target_data)
 
         return data_array, target_array
+
+    def check_is_within_bounds(self, x, y): # Needs to be altered to that subject can still move up/down if left/right unavailable
+
+        # Check if (x, y) is within the grid boundaries.
+        return 0 <= x < self.width and 0 <= y < self.height
 
     def add_subject(self, subject):
 
