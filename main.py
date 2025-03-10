@@ -65,8 +65,9 @@ def main():
 
             # Peform action
             softmax_output = subject.brain.forward(X=X, training=None)
-            max_value = np.max(softmax_output, axis=1, keepdims=True)
-            best_indices = np.where(softmax_output == max_value)[1]
+            probability_dict = {i: softmax_output[0][i] for i in range(len(softmax_output[0]))}
+            max_value = max(probability_dict.values())
+            best_indices = [key for key, value in probability_dict.items() if value == max_value]
             best_move_index = np.random.choice(best_indices) # Random choice if tied
             # New positional data
             dx, dy = env.get_movement_delta(best_move_index)
