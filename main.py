@@ -2,7 +2,7 @@
 ECOSYSTEM EVOLUTION SIMULATOR
 """
 
-MAX_ITERATIONS = 10
+MAX_ITERATIONS = 30
 ENV_HEIGHT = 50
 ENV_WIDTH = 100
 SUBJECT_NUM = 1
@@ -51,7 +51,7 @@ def main():
             subject = occupied_square.subject
             # Prepare perception training input
             neighboring_squares = env.get_neighbors(position=square, perception_range=SUBJECT_PERCEPTION_RANGE) # Also includes square itself
-            input_data, target_data = env.get_training_data(neighboring_squares)
+            input_data, target_data = env.get_training_data(neighboring_squares, square)
             # Append new historical data and then query to get final training data df
             db.insert_hist(subject_id=subject.id, square_id=occupied_square.id, feature_count=NN_FEATURE_COUNT,
                            feature_data=input_data, target_data=target_data)
@@ -65,18 +65,18 @@ def main():
 
             # Peform action
             softmax_output = subject.brain.forward(X=X, training=None)
-            probability_dict = {i: softmax_output[0][i] for i in range(len(softmax_output[0]))}
-            max_value = max(probability_dict.values())
-            best_indices = [key for key, value in probability_dict.items() if value == max_value]
-            best_move_index = np.random.choice(best_indices) # Random choice if tied
-            # New positional data
+            best_move_index = np.argmax(softmax_output, axis=1)[0]  # Select highest probability move
+
+            # Convert index to movement delta
             dx, dy = env.get_movement_delta(best_move_index)
+            print(f"({dx}, {dy})")
+
             # Get subject's current position
             new_x = occupied_square.position.x + dx
             new_y = occupied_square.position.y + dy
+
             # Ensure the move is within bounds
             if env.check_is_within_bounds(new_x, new_y):
-
                 # Find the new square
                 new_square = env.get_square(new_x, new_y)
                 # Ensure the square is not occupied before moving
@@ -84,11 +84,11 @@ def main():
                     # Move subject to new square
                     occupied_square.subject = None  # Remove subject from old square
                     new_square.subject = subject  # Assign subject to new square
-                    print(f"Subject moved to ({new_x}, {new_y}).")
+                    # print(f"Subject moved to ({new_x}, {new_y}).")
                 else:
                     print(f"Square ({new_x}, {new_y}) is occupied, staying in place.")
             else:
-                print(f"Move out of bounds: ({new_x}, {new_y}) - Staying in place")
+                print(f"Move out of bounds: ({new_x}, {new_y}) - Staying in place.")
 
 
 # RUN
