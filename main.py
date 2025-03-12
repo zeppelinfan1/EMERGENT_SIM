@@ -8,7 +8,7 @@ ENV_WIDTH = 100
 SUBJECT_NUM = 1
 SUBJECT_GENE_NUM = 8
 SUBJECT_GENE_LEN = 10
-SUBJECT_PERCEPTION_RANGE = 1
+SUBJECT_PERCEPTION_RANGE = 3
 NN_FEATURE_COUNT = 4 # Terrain Land, Terrain Hole, Object Presence, Subject Presence
 
 
@@ -35,7 +35,8 @@ def main():
 
         subject = Subject(gene_number=SUBJECT_GENE_NUM,
                           gene_length=SUBJECT_GENE_LEN,
-                          features=NN_FEATURE_COUNT)
+                          features=NN_FEATURE_COUNT,
+                          perception_range=SUBJECT_PERCEPTION_RANGE)
         env.add_subject(subject)
 
     # Start iterations

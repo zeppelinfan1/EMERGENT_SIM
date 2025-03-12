@@ -56,7 +56,9 @@ class Subject:
     gene_number: int
     gene_length: int
     features: int
+    perception_range: int
     energy: int = 100
+    env_memory: dict = field(default_factory=dict)
     brain: nn.Model = field(init=False)
     genetics: Genetics = field(init=False) # Created in post init
 
@@ -95,9 +97,13 @@ class Subject:
 
         return brain
 
+    def update_memory(self, env_section):
+
+        # Loop through each square and replace with current
+        self.env_memory.update(env_section)
+        print(self.env_memory)
 
 if __name__ == "__main__":
-    subject1 = Subject(gene_number=6, gene_length=10, features=4)
+    subject1 = Subject(gene_number=6, gene_length=10, features=4, perception_range=2)
     print(subject1)
-
 

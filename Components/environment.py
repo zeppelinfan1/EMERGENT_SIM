@@ -90,6 +90,27 @@ class Environment:
 
         return None  # Returns None if no square is found
 
+    def get_squares_in_radius(self, pos, radius):
+
+        x, y = pos.x, pos.y
+        env_section = {}
+
+        # Loop over entire radius - x and y
+        for dx in range(-radius, radius + 1):
+
+            for dy in range(-radius, radius + 1):
+
+                new_x, new_y = x + dx, y + dy
+
+                # Ensure that square is within total environment
+                if self.check_is_within_bounds(new_x, new_y):
+                    # Add square to dict
+                    square_data = self.get_square(new_x, new_y)
+                    env_section[square_data.id] = square_data
+
+        return env_section
+
+
     def get_movement_delta(self, move_index: int):
 
         # Retrieve (dx, dy) movement from index
@@ -179,20 +200,16 @@ class Environment:
 if __name__ == "__main__":
 
     env = Environment(25, 10, default_terrain=0.97)
-    env.add_subject(Subject(5, 10, 9))
+    env.add_subject(Subject(5, 10, 9, 2))
     occupied_squares = env.get_occupied_squares()
-    # For each subject
-    for occupied_square in occupied_squares:
-        square = occupied_square.position
-        # Prepare perception training input
-        neighboring_squares = env.get_neighbors(position=square, perception_range=1)  # Also includes square itself
-        input_data, target_data = env.get_training_data(neighboring_squares, square)
-        print(input_data, target_data)
-        print(input_data.shape)
 
-        # Train
-        pass
+    for square in occupied_squares:
 
-        # Peform action
-        pass
+        subject = square.subject
+        # Gather perception radius
+        perceivable_env = env.get_squares_in_radius(square.position, subject.perception_range)
+        # Update memory
+        subject.update_memory(perceivable_env)
+
+
 
