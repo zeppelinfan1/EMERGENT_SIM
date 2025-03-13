@@ -7,21 +7,30 @@ from Components.db_api import DB_API
 
 # DATACLASSES
 @dataclass
-class TerrainType:
+class Terrain:
 
     name: str
-    energy_penalty: int = 0
+    energy_penalty: int
+    probability: float = 0
+    overall_probability: float = field(default_factory=float)
 
 # Types of terrains
-LAND = TerrainType(name="LAND")
-HOLE = TerrainType(name="HOLE", energy_penalty=100)
+LAND = Terrain(name="LAND", energy_penalty=0, probability=1)
+HOLE = Terrain(name="HOLE", energy_penalty=100, probability=0.03)
 
 @dataclass
 class Object:
 
     name: str
-    interactable: bool = True # May pick up, drop or use the object
-    weight: int = 1
+    energy_penalty: int
+    probability: float = 0
+    overall_probability: float = field(default_factory=float)
+
+@dataclass
+class Features:
+
+    feature: dict = field(default_factory=dict) # Either: Terrain, Object, ... potentially more later
+
 
 @dataclass
 class Position:
@@ -33,11 +42,10 @@ class Position:
 class Square:
 
     id: int # Unique identifier
-    terrain: TerrainType # Type of terrain
     position: Position # x, y coordinates
-    objects: list = field(default_factory=list) # Objects within square
+    features: list = field(default_factory=list)
     subject: Subject = None
-
+    # For assigning id - will increment
     last_id = 0
 
     def __post_init__(self):
@@ -59,7 +67,7 @@ class Environment:
 
     width: int
     height: int
-    default_terrain: float # How much of the terrain is land as opposed to alternatives (Holes)
+    features_list: list
     square_map: dict = field(default_factory=dict)
     movement_map = {
         0: (-1, -1), 1: (-1, 0), 2: (-1, 1),
@@ -69,14 +77,32 @@ class Environment:
 
     def __post_init__(self):
 
+        # Initialize features
+        features = Features()
+        feature_id = 1 # Will increment
+        for var_name, var_value in globals().items():
+
+            if isinstance(var_value, tuple(self.features_list)):
+                features.feature[feature_id] = var_value
+                feature_id += 1
+
+        print(features)
+
         # Start populating squares from the bottom right
         for y in range(self.height):
 
             for x in range(self.width):
 
+                # Setting position based on width and height
                 pos = Position(x, y)
-                terrain_type = "LAND" if random.random() < self.default_terrain else "HOLE"
-                new_square = Square(id=0, terrain=terrain_type, position=pos)
+
+                # Assign features based on random probability
+                for feature_type in features.feature.values():
+
+                    pass
+
+                # Create square
+                new_square = Square(id=0, position=pos)
                 self.square_map[(pos.x, pos.y)] = new_square
 
     def get_square(self, x, y):
@@ -199,7 +225,7 @@ class Environment:
 
 if __name__ == "__main__":
 
-    env = Environment(25, 10, default_terrain=0.97)
+    env = Environment(width=1, height=1, features_list=[Terrain, Object])
     env.add_subject(Subject(5, 10, 9, 2))
     occupied_squares = env.get_occupied_squares()
 
