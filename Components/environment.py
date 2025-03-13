@@ -7,24 +7,17 @@ from Components.db_api import DB_API
 
 # DATACLASSES
 @dataclass
-class Terrain:
+class Feature:
 
     name: str
+    type: str
     energy_penalty: int
     probability: float = 0
     overall_probability: float = field(default_factory=float)
 
 # Types of terrains
-LAND = Terrain(name="LAND", energy_penalty=0, probability=1)
-HOLE = Terrain(name="HOLE", energy_penalty=100, probability=0.03)
-
-@dataclass
-class Object:
-
-    name: str
-    energy_penalty: int
-    probability: float = 0
-    overall_probability: float = field(default_factory=float)
+LAND = Feature(name="LAND", type="TERRAIN", energy_penalty=0, probability=1)
+HOLE = Feature(name="HOLE", type="TERRAIN", energy_penalty=100, probability=0.05)
 
 @dataclass
 class Features:
@@ -67,7 +60,7 @@ class Environment:
 
     width: int
     height: int
-    features_list: list
+    features: Features = field(init=False)
     square_map: dict = field(default_factory=dict)
     movement_map = {
         0: (-1, -1), 1: (-1, 0), 2: (-1, 1),
@@ -78,15 +71,7 @@ class Environment:
     def __post_init__(self):
 
         # Initialize features
-        features = Features()
-        feature_id = 1 # Will increment
-        for var_name, var_value in globals().items():
-
-            if isinstance(var_value, tuple(self.features_list)):
-                features.feature[feature_id] = var_value
-                feature_id += 1
-
-        print(features)
+        self.features = self.initialize_features()
 
         # Start populating squares from the bottom right
         for y in range(self.height):
@@ -97,13 +82,60 @@ class Environment:
                 pos = Position(x, y)
 
                 # Assign features based on random probability
-                for feature_type in features.feature.values():
-
-                    pass
+                feature_list = self.assign_random_feature()
 
                 # Create square
-                new_square = Square(id=0, position=pos)
+                new_square = Square(id=0, position=pos, features=feature_list)
                 self.square_map[(pos.x, pos.y)] = new_square
+
+    def initialize_features(self):
+
+        # Gathering created features
+        features = Features()
+        feature_dict = features.feature
+        for var_name, var_value in globals().items():
+
+            # If the value is a Feature object
+            if isinstance(var_value, Feature):
+
+                # Already added to dictionary?
+                if var_value.type not in feature_dict.keys():
+                    # Create entry in value (list)
+                    feature_dict[var_value.type] = []
+                    feature_dict[var_value.type].append(var_value)
+                else:
+                    feature_dict[var_value.type].append(var_value)
+
+        # Loop through keys
+        for type in feature_dict.keys():
+
+            # Gather values and loop to sum up total probability
+            value_list = feature_dict[type]
+            total_probability = 0
+            for obs in value_list:
+
+                total_probability += obs.probability
+
+            # Calculate individual probability
+            for obs in value_list:
+
+                obs.overall_probability = obs.probability / total_probability
+
+        return features
+
+    def assign_random_feature(self) -> list:
+
+        # Loop through keys:
+        feature_selection = []
+        for feature_type, feature_list in self.features.feature.items():
+
+            choices = feature_list
+            probabilities = [feature.overall_probability for feature in feature_list]
+            # Select a feature randomly based on probabilities
+            selected_feature = random.choices(choices, weights=probabilities, k=1)[0]
+            feature_selection.append(selected_feature)
+
+        return feature_selection
 
     def get_square(self, x, y):
 
@@ -214,20 +246,22 @@ class Environment:
         for y in reversed(range(self.height)):  # Print from top to bottom
 
             row = []
-
             for x in range(self.width):
 
                 square = self.get_square(x, y)
-                row.append("H" if square and square.terrain == "HOLE" else "L")  # H = Hole, L = Land
+                if square.features[0].name == "LAND": row.append("L")
+                else: row.append("H")
 
             print(" ".join(row))
 
 
 if __name__ == "__main__":
 
-    env = Environment(width=1, height=1, features_list=[Terrain, Object])
+    env = Environment(width=50, height=20)
     env.add_subject(Subject(5, 10, 9, 2))
     occupied_squares = env.get_occupied_squares()
+
+    env.display()
 
     for square in occupied_squares:
 
