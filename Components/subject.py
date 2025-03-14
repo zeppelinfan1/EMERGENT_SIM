@@ -102,7 +102,10 @@ class Subject:
 
         # Loop through each square and replace with current
         self.env_memory.update(env_section)
-        # print(env_section)
+        # Make sure feature memory contains all new features
+        self.feature_memory = {feature.name: self.feature_memory.get(feature.name, 1)
+                               for square in self.env_memory.values()
+                               for feature in square.features}
 
 if __name__ == "__main__":
     subject1 = Subject(gene_number=6, gene_length=10, features=4, perception_range=2)

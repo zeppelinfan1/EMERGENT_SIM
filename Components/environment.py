@@ -261,8 +261,6 @@ if __name__ == "__main__":
     env.add_subject(Subject(5, 10, 9, 2))
     occupied_squares = env.get_occupied_squares()
 
-    env.display()
-
     for square in occupied_squares:
 
         subject = square.subject
