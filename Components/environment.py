@@ -199,34 +199,29 @@ class Environment:
 
         return neighbors
 
-    def get_training_data(self, neighbors: list, subject_position):
+    def get_training_data(self, env_memory: dict, feature_memory: dict):
 
-        input_data = [] # Features of environment squares
-        target_data = [] # Survival criteria
+        input_data = [] # 1 hot for features for each square in environment
+        target_data = [] # Based on feature memory
 
-        for square in neighbors:
+        # Number of features, for 1 hot encodings
+        feature_num = len(feature_memory.values())
 
-            terrain_encoding = [1, 0] if square.terrain == "LAND" else [0, 1] # One hot encoding for terrain - temporary
-            object_presence = [1] if square.objects else [0]
-            subject_presence = [1] if square.subject else [0]
+        # Loop through squares
+        for square in env_memory.values():
 
-            # Find relative position
-            dx = square.position.x - subject_position.x
-            dy = square.position.y - subject_position.y
-            move_index = next((key for key, value in self.movement_map.items() if value == (dx, dy)), None)
-            # Target data append
-            if move_index is not None:
-                target_data.append(move_index)
+            # Loop through features
+            for feature in square.features:
 
-            # Combine into one row
-            square_features = terrain_encoding + object_presence + subject_presence
-            input_data.append(square_features)
+                # One hot encoding i.e. input data
+                one_hot_feature = [1 if feature.name == mem_name else 0 for mem_name in feature_memory.keys()]
+                input_data.append(one_hot_feature)
+                # Target value from feature memory
+                target_value = feature_memory.get(feature.name)
+                target_data.append(target_value)
 
-        # Convert into array
-        data_array = np.array(input_data)
-        target_array = np.array(target_data)
+        return np.array(input_data), np.array(target_data)
 
-        return data_array, target_array
 
     def check_is_within_bounds(self, x, y): # Needs to be altered to that subject can still move up/down if left/right unavailable
 

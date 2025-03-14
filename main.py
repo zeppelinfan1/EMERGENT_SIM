@@ -2,7 +2,7 @@
 ECOSYSTEM EVOLUTION SIMULATOR
 """
 
-MAX_ITERATIONS = 30
+MAX_ITERATIONS = 1
 ENV_HEIGHT = 50
 ENV_WIDTH = 100
 SUBJECT_NUM = 1
@@ -55,13 +55,13 @@ def main():
             subject.update_memory(perceivable_env)
 
             # Goal assessment
-            pass
+            input_data, target_data = env.get_training_data(subject.env_memory, subject.feature_memory)
+            print(input_data)
 
 
 
-            # # Prepare perception training input
-            # neighboring_squares = env.get_neighbors(position=square, perception_range=SUBJECT_PERCEPTION_RANGE) # Also includes square itself
-            # input_data, target_data = env.get_training_data(neighboring_squares, square)
+
+
             # # Append new historical data and then query to get final training data df
             # db.insert_hist(subject_id=subject.id, square_id=occupied_square.id, feature_count=NN_FEATURE_COUNT,
             #                feature_data=input_data, target_data=target_data)
