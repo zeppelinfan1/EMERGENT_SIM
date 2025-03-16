@@ -56,6 +56,7 @@ class Subject:
     gene_number: int
     gene_length: int
     perception_range: int
+    energy_change: int = 0
     energy: int = 100
     env_memory: dict = field(default_factory=dict)
     modular_networks: dict = field(default_factory=dict)
@@ -72,26 +73,28 @@ class Subject:
     def initialize_brain(self, input_features):
 
         # Instantiate the model
-        brain = nn.Model()
+        network = nn.Model()
 
         # Add layers
-        brain.add(nn.Layer_Dense(input_features, 512, weight_regularizer_l2=5e-4, bias_regularizer_l2=5e-4))
-        brain.add(nn.Activation_ReLU())
-        brain.add(nn.Layer_Dense(512, 512))
-        brain.add(nn.Activation_ReLU())
-        brain.add(nn.Layer_Dropout(rate=0.1))
-        brain.add(nn.Layer_Dense(512, 9))
-        brain.add(nn.Activation_Softmax())
+        network.add(nn.Layer_Dense(input_features, 512, weight_regularizer_l2=5e-4, bias_regularizer_l2=5e-4))
+        network.add(nn.Activation_ReLU())
+        network.add(nn.Layer_Dense(512, 512))
+        network.add(nn.Activation_ReLU())
+        network.add(nn.Layer_Dropout(rate=0.1))
+        network.add(nn.Layer_Dense(512, 1))
+        network.add(nn.Activation_Linear())
 
         # Set loss, optimizer and accuracy objects
-        brain.set(
-            loss=nn.Loss_CategoricalCrossentropy(),
+        network.set(
+            loss=nn.Loss_MeanSquaredError(),
             optimizer=nn.Optimizer_Adam(decay=1e-7),
             accuracy=nn.Accuracy_Categorical()
         )
 
         # Finalize
-        brain.finalize()
+        network.finalize()
+
+        return network
 
     def update_memory(self, env_section):
 

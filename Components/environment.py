@@ -11,13 +11,13 @@ class Feature:
 
     name: str
     type: str
-    energy_penalty: int
+    energy_change: int
     probability: float = 0
     overall_probability: float = field(default_factory=float)
 
 # Types of terrains
-LAND = Feature(name="LAND", type="TERRAIN", energy_penalty=0, probability=1)
-HOLE = Feature(name="HOLE", type="TERRAIN", energy_penalty=100, probability=0.05)
+LAND = Feature(name="LAND", type="TERRAIN", energy_change=0, probability=1)
+HOLE = Feature(name="HOLE", type="TERRAIN", energy_change=-100, probability=0.05)
 
 @dataclass
 class Features:
@@ -251,48 +251,85 @@ class Environment:
 
 if __name__ == "__main__":
 
+    MAX_ITERATIONS = 1
+    NUM_SUBJECTS = 20
+
     env = Environment(width=50, height=20)
-    env.add_subject(Subject(gene_number=6, gene_length=10, perception_range=2))
-    occupied_squares = env.get_occupied_squares()
 
-    for square in occupied_squares:
+    for _ in range(NUM_SUBJECTS):
 
-        """PERCEIVING ENVIRONMENT
-        """
-        subject = square.subject
-        # Gather perception radius
-        perceivable_env = env.get_squares_in_radius(square.position, subject.perception_range)
-        # Update memory
-        subject.update_memory(perceivable_env)
+        env.add_subject(Subject(gene_number=6, gene_length=10, perception_range=2))
 
-        """NEURAL NETWORK RETRAINING
-        """
-        # Check for newly encountered features and prep modular network if needed
-        env_features = list(filter(lambda x: x is not None,
-                                   [feature for square in perceivable_env.values() for feature in square.features]))
-        unique_features = set(feature.name for feature in env_features)
+    for i in range(MAX_ITERATIONS):
 
-        for feature in unique_features:
+        print(f"Iteration Number: {i}")
+        occupied_squares = env.get_occupied_squares()
 
-            if feature not in subject.modular_networks.keys():
-                # So far only 1 input array for features networks (numerous_features and subject_presence)
-                subject.modular_networks[feature] = subject.initialize_brain(input_features=1)
+        for square in occupied_squares:
 
-            # Gathering training input data - 1st: isolate squares where feature is present
-            feature_squares = [square for key, square in perceivable_env.items()
-                            if any(f.name == feature for f in square.features)]
+            subject = square.subject
+            """PROCESS ENVIRONMENTAL FEATURES
+            """
+            # I.e. energy change for subjects
+            total_energy_change = sum([feature.energy_change for feature in square.features])
+            subject.energy_change = total_energy_change
+            subject.energy += total_energy_change
 
+        for square in occupied_squares:
+
+            subject = square.subject
+            print(f"Subject: {subject.id}")
+            """PERCEIVING ENVIRONMENT
+            """
+            # Gather perception radius
+            perceivable_env = env.get_squares_in_radius(square.position, subject.perception_range)
+            # Update memory
+            subject.update_memory(perceivable_env)
+
+            """NEURAL NETWORK RETRAINING
+            """
+            # Check for newly encountered features and prep modular network if needed
+            square_features = [feature.name for feature in square.features]
+
+            for feature in square_features:
+
+                if feature not in subject.modular_networks.keys():
+                    # So far only 1 input array for features networks with 1 element [numerous_features]
+                    subject.modular_networks[feature] = subject.initialize_brain(input_features=1)
+
+                input_data = []
+                target_data = []
+                # Check for presence of another feature - input data value
+                numerous_features = 1 if len(square.features) > 1 else 0
+                input_data.append([numerous_features])
+                # Check for energy change - target data value
+                energy_change = (subject.energy_change + 100) / 200
+                target_data.append([energy_change])
+
+                # Train network
+                subject.modular_networks[feature].train(X=np.array(input_data), y=np.array(target_data), epochs=10, batch_size=128)
+
+            # Check for squares occupied by other subjects and prep modular network if needed
+            env_subject_squares = [square for square in perceivable_env.values() if square.subject is not None
+                                   and square.subject is not subject] # Not the subject itself
             input_data = []
-            for ind_square in feature_squares:
+            target_data = []
+            for alt_square in env_subject_squares:
 
-                # Check for presence of another feature
-                numerous_features = 1 if len(perceivable_env.get(ind_square.id).features) > 1 else 0
-                # Check for presence of subject
-                subject_presence = 1 if ind_square.subject == subject else 0
-                input_data.append([numerous_features, subject_presence])
+                alt_subject = alt_square.subject
+                alt_subject_id = f"{alt_subject.id}"
+                if alt_subject_id not in subject.modular_networks.keys():
+                    # So far only 1 input array for features networks with 1 element [numerous_features]
+                    subject.modular_networks[alt_subject_id] = subject.initialize_brain(input_features=1)
 
-                # Gathering training target data
-                pass
+                # Gather training/target data for alternate subjects i.e. sensory network
+                # Check for presence of another feature - input data value
+                numerous_features = 1 if len(alt_square.features) > 1 else 0
+                input_data.append([numerous_features])
+                # Check for energy change - target data value
+                energy_change = (alt_subject.energy_change + 100) / 200
+                target_data.append([energy_change])
 
-
+                subject.modular_networks[alt_subject_id].train(X=np.array(input_data), y=np.array(target_data), epochs=10,
+                                                        batch_size=128)
 
