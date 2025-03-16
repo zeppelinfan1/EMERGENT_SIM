@@ -9,11 +9,20 @@ from Components.db_api import DB_API
 @dataclass
 class Feature:
 
+    id: int = field(init=False)
     name: str
     type: str
     energy_change: int
     probability: float = 0
     overall_probability: float = field(default_factory=float)
+
+    # For assigning id - will increment
+    last_id = 0
+
+    def __post_init__(self):
+
+        Feature.last_id += 1
+        self.id = Feature.last_id
 
 # Types of terrains
 LAND = Feature(name="LAND", type="TERRAIN", energy_change=0, probability=1)
@@ -34,10 +43,11 @@ class Position:
 @dataclass
 class Square:
 
-    id: int # Unique identifier
+    id: int = field(init=False)
     position: Position # x, y coordinates
     features: list = field(default_factory=list)
     subject: Subject = None
+
     # For assigning id - will increment
     last_id = 0
 
@@ -85,7 +95,7 @@ class Environment:
                 feature_list = self.assign_random_feature()
 
                 # Create square
-                new_square = Square(id=0, position=pos, features=feature_list)
+                new_square = Square(position=pos, features=feature_list)
                 self.square_map[(pos.x, pos.y)] = new_square
 
     def initialize_features(self):
@@ -289,13 +299,15 @@ if __name__ == "__main__":
             """NEURAL NETWORK RETRAINING
             """
             # Check for newly encountered features and prep modular network if needed
-            square_features = [feature.name for feature in square.features]
+            square_features = [feature for feature in square.features]
+            print(square_features)
 
             for feature in square_features:
 
-                if feature not in subject.modular_networks.keys():
+                feature_key = f"FEATURE:{feature.id}"
+                if feature_key not in subject.modular_networks.keys():
                     # So far only 1 input array for features networks with 1 element [numerous_features]
-                    subject.modular_networks[feature] = subject.initialize_brain(input_features=1)
+                    subject.modular_networks[feature_key] = subject.initialize_brain(input_features=1)
 
                 input_data = []
                 target_data = []
@@ -305,9 +317,10 @@ if __name__ == "__main__":
                 # Check for energy change - target data value
                 energy_change = (subject.energy_change + 100) / 200
                 target_data.append([energy_change])
+                print(input_data, target_data)
 
                 # Train network
-                subject.modular_networks[feature].train(X=np.array(input_data), y=np.array(target_data), epochs=10, batch_size=128)
+                subject.modular_networks[feature_key].train(X=np.array(input_data), y=np.array(target_data), epochs=10, batch_size=128)
 
             # Check for squares occupied by other subjects and prep modular network if needed
             env_subject_squares = [square for square in perceivable_env.values() if square.subject is not None
@@ -317,10 +330,10 @@ if __name__ == "__main__":
             for alt_square in env_subject_squares:
 
                 alt_subject = alt_square.subject
-                alt_subject_id = f"{alt_subject.id}"
-                if alt_subject_id not in subject.modular_networks.keys():
+                alt_subject_key = f"SUBJECT:{alt_subject.id}"
+                if alt_subject_key not in subject.modular_networks.keys():
                     # So far only 1 input array for features networks with 1 element [numerous_features]
-                    subject.modular_networks[alt_subject_id] = subject.initialize_brain(input_features=1)
+                    subject.modular_networks[alt_subject_key] = subject.initialize_brain(input_features=1)
 
                 # Gather training/target data for alternate subjects i.e. sensory network
                 # Check for presence of another feature - input data value
@@ -329,7 +342,9 @@ if __name__ == "__main__":
                 # Check for energy change - target data value
                 energy_change = (alt_subject.energy_change + 100) / 200
                 target_data.append([energy_change])
+                print(input_data, target_data)
 
-                subject.modular_networks[alt_subject_id].train(X=np.array(input_data), y=np.array(target_data), epochs=10,
+                subject.modular_networks[alt_subject_key].train(X=np.array(input_data), y=np.array(target_data), epochs=10,
                                                         batch_size=128)
 
+            print(subject.modular_networks)
