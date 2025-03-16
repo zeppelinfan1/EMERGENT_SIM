@@ -55,12 +55,10 @@ class Subject:
     id: int = field(init=False)
     gene_number: int
     gene_length: int
-    features: int
     perception_range: int
     energy: int = 100
     env_memory: dict = field(default_factory=dict)
-    feature_memory: dict = field(default_factory=dict)
-    brain: nn.Model = field(init=False)
+    modular_networks: dict = field(default_factory=dict)
     genetics: Genetics = field(init=False) # Created in post init
 
     last_subject = 0
@@ -72,13 +70,13 @@ class Subject:
         self.genetics = Genetics(gene_number=self.gene_number, gene_length=self.gene_length)
         self.brain = self.initialize_brain()
 
-    def initialize_brain(self):
+    def initialize_brain(self, input_features):
 
         # Instantiate the model
         brain = nn.Model()
 
         # Add layers
-        brain.add(nn.Layer_Dense(self.features, 512, weight_regularizer_l2=5e-4, bias_regularizer_l2=5e-4))
+        brain.add(nn.Layer_Dense(input_features, 512, weight_regularizer_l2=5e-4, bias_regularizer_l2=5e-4))
         brain.add(nn.Activation_ReLU())
         brain.add(nn.Layer_Dense(512, 512))
         brain.add(nn.Activation_ReLU())
@@ -102,12 +100,8 @@ class Subject:
 
         # Loop through each square and replace with current
         self.env_memory.update(env_section)
-        # Make sure feature memory contains all new features
-        self.feature_memory = {feature.name: self.feature_memory.get(feature.name, 1)
-                               for square in self.env_memory.values()
-                               for feature in square.features}
 
 if __name__ == "__main__":
-    subject1 = Subject(gene_number=6, gene_length=10, features=4, perception_range=2)
+    subject1 = Subject(gene_number=6, gene_length=10, perception_range=2)
     print(subject1)
 

@@ -222,7 +222,6 @@ class Environment:
 
         return np.array(input_data), np.array(target_data)
 
-
     def check_is_within_bounds(self, x, y): # Needs to be altered to that subject can still move up/down if left/right unavailable
 
         # Check if (x, y) is within the grid boundaries.
@@ -253,16 +252,21 @@ class Environment:
 if __name__ == "__main__":
 
     env = Environment(width=50, height=20)
-    env.add_subject(Subject(5, 10, 9, 2))
+    env.add_subject(Subject(gene_number=6, gene_length=10, perception_range=2))
     occupied_squares = env.get_occupied_squares()
 
     for square in occupied_squares:
 
+        """PERCEIVING ENVIRONMENT
+        """
         subject = square.subject
         # Gather perception radius
         perceivable_env = env.get_squares_in_radius(square.position, subject.perception_range)
         # Update memory
         subject.update_memory(perceivable_env)
 
+        """NEURAL NETWORK RETRAINING
+        """
+        # Feature networks
 
 
