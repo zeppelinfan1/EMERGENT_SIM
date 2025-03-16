@@ -68,7 +68,6 @@ class Subject:
         Subject.last_subject += 1
         self.id = Subject.last_subject
         self.genetics = Genetics(gene_number=self.gene_number, gene_length=self.gene_length)
-        self.brain = self.initialize_brain()
 
     def initialize_brain(self, input_features):
 
@@ -93,8 +92,6 @@ class Subject:
 
         # Finalize
         brain.finalize()
-
-        return brain
 
     def update_memory(self, env_section):
 

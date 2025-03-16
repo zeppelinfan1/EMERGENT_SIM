@@ -267,6 +267,32 @@ if __name__ == "__main__":
 
         """NEURAL NETWORK RETRAINING
         """
-        # Feature networks
+        # Check for newly encountered features and prep modular network if needed
+        env_features = list(filter(lambda x: x is not None,
+                                   [feature for square in perceivable_env.values() for feature in square.features]))
+        unique_features = set(feature.name for feature in env_features)
+
+        for feature in unique_features:
+
+            if feature not in subject.modular_networks.keys():
+                # So far only 1 input array for features networks (numerous_features and subject_presence)
+                subject.modular_networks[feature] = subject.initialize_brain(input_features=1)
+
+            # Gathering training input data - 1st: isolate squares where feature is present
+            feature_squares = [square for key, square in perceivable_env.items()
+                            if any(f.name == feature for f in square.features)]
+
+            input_data = []
+            for ind_square in feature_squares:
+
+                # Check for presence of another feature
+                numerous_features = 1 if len(perceivable_env.get(ind_square.id).features) > 1 else 0
+                # Check for presence of subject
+                subject_presence = 1 if ind_square.subject == subject else 0
+                input_data.append([numerous_features, subject_presence])
+
+                # Gathering training target data
+                pass
+
 
 
