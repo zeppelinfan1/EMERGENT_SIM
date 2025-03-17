@@ -69,6 +69,8 @@ class Subject:
         Subject.last_subject += 1
         self.id = Subject.last_subject
         self.genetics = Genetics(gene_number=self.gene_number, gene_length=self.gene_length)
+        # Attention mechnism
+        self.modular_networks["ATTN"] = self.initialize_brain(input_features=1)
 
     def initialize_brain(self, input_features):
 

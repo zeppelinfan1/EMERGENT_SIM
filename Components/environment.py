@@ -347,4 +347,5 @@ if __name__ == "__main__":
                 subject.modular_networks[alt_subject_key].train(X=np.array(input_data), y=np.array(target_data), epochs=10,
                                                         batch_size=128)
 
-            print(subject.modular_networks)
+            # Attention Mechanism training
+            pass
