@@ -262,7 +262,7 @@ class Environment:
 if __name__ == "__main__":
 
     MAX_ITERATIONS = 1
-    NUM_SUBJECTS = 20
+    NUM_SUBJECTS = 1
 
     env = Environment(width=50, height=20)
 
@@ -296,11 +296,10 @@ if __name__ == "__main__":
             # Update memory
             subject.update_memory(perceivable_env)
 
-            """NEURAL NETWORK RETRAINING
+            """ FEATURE NEURAL NETWORK RETRAINING
             """
             # Check for newly encountered features and prep modular network if needed
             square_features = [feature for feature in square.features]
-            print(square_features)
 
             for feature in square_features:
 
@@ -317,7 +316,6 @@ if __name__ == "__main__":
                 # Check for energy change - target data value
                 energy_change = (subject.energy_change + 100) / 200
                 target_data.append([energy_change])
-                print(input_data, target_data)
 
                 # Train network
                 subject.modular_networks[feature_key].train(X=np.array(input_data), y=np.array(target_data), epochs=10, batch_size=128)
@@ -337,15 +335,32 @@ if __name__ == "__main__":
 
                 # Gather training/target data for alternate subjects i.e. sensory network
                 # Check for presence of another feature - input data value
-                numerous_features = 1 if len(alt_square.features) > 1 else 0
-                input_data.append([numerous_features])
+                alt_numerous_features = 1 if len(alt_square.features) > 1 else 0
+                input_data.append([alt_numerous_features])
                 # Check for energy change - target data value
                 energy_change = (alt_subject.energy_change + 100) / 200
                 target_data.append([energy_change])
-                print(input_data, target_data)
 
                 subject.modular_networks[alt_subject_key].train(X=np.array(input_data), y=np.array(target_data), epochs=10,
                                                         batch_size=128)
 
-            # Attention Mechanism training
-            pass
+            # Forward pass through modular networks in order to get Attention Mechanism training data
+            for current_feature in square.features:
+
+                output = subject.modular_networks[f"FEATURE:{current_feature.id}"].forward(X=np.array(numerous_features), training=None)
+                # subject.modular_networks["ATTN"].train(X=np.array())
+
+            """PLAN ASSESSMENT
+            """
+            # Loop through each square in subject memory
+            for square_id, square_data in subject.env_memory.items():
+
+                # Gather input data
+                pass
+
+
+
+
+
+
+
