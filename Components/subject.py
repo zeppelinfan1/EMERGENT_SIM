@@ -59,6 +59,7 @@ class Subject:
     energy_change: int = 0
     energy: int = 100
     env_memory: dict = field(default_factory=dict)
+    feature_embeddings: dict = field(default_factory=dict)
     modular_networks: dict = field(default_factory=dict)
     genetics: Genetics = field(init=False) # Created in post init
 
