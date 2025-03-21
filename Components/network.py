@@ -544,18 +544,14 @@ class Loss_Constrastive(Loss):
 
     def backward(self, dvalues, y_true):
 
+        # Split out pairs
         a = dvalues[:, 0, :]
         b = dvalues[:, 1, :]
-
+        # Calculate Euclidean distances between pairs
         diff = a - b
         distances = np.linalg.norm(diff, axis=1, keepdims=True)  # shape (batch_size, 1)
-
         # Prevent division by zero
         distances = np.maximum(distances, 1e-7)
-
-        # Gradients w.r.t. a and b
-        # For positive pairs (y=1), gradient is 2 * (a - b)
-        # For negative pairs (y=0), gradient is 2 * (margin - D) * -(a - b) / D
 
         # Broadcast y_true to shape (batch_size, 1)
         y_true = y_true.reshape(-1, 1)
@@ -565,9 +561,10 @@ class Loss_Constrastive(Loss):
         neg_mask = 1 - y_true
         margin_term = np.maximum(0, self.margin - distances)
 
+        # Loss = distance ** 2, therefore gradient = 2 * (a - b)
         grad_pos = 2 * pos_mask * diff
+        # Derivative for negative gradient
         grad_neg = -2 * neg_mask * margin_term * diff / distances
-
         # Total gradients
         grad = grad_pos + grad_neg
 
@@ -575,8 +572,6 @@ class Loss_Constrastive(Loss):
         self.dvalues = np.zeros_like(dvalues)
         self.dvalues[:, 0, :] = grad  # ∂L/∂a
         self.dvalues[:, 1, :] = -grad  # ∂L/∂b (opposite direction)
-
-        print(self.dvalues)
 
 
 # Cross-entropy loss
