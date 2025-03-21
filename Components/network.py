@@ -79,7 +79,7 @@ class Layer_Dropout:
     def forward(self, values, training):
 
         # Save input values
-        self.input = values
+        self.inputs = values
 
         # If not in the training mode - return values
         if not training:
@@ -978,32 +978,71 @@ class Model:
     # Performs forward pass
     def forward(self, X, training):
 
-        # Call forward method on the input layer
-        # this will set the output property that
-        # the first layer in "prev" object is expecting
-        self.input_layer.forward(X, training)
+        if X.ndim == 3:
+            # Contrastive input: shape (batch_size, 2, input_dim)
+            input_a = X[:, 0, :]
+            input_b = X[:, 1, :]
 
-        # Call forward method of every object in a chain
-        # Pass output of the previous object as a parameter
-        for layer in self.layers:
-            layer.forward(layer.prev.output, training)
+            # === FORWARD A ===
+            self.input_layer.forward(input_a, training)
+            for layer in self.layers:
+                layer.forward(layer.prev.output, training)
+                layer.inputs_a = layer.inputs.copy()
 
-        # "layer" is now the last object from the list,
-        # return it's output
-        return layer.output
+            output_a = self.layers[-1].output
+
+            # === FORWARD B ===
+            self.input_layer.forward(input_b, training)
+            for layer in self.layers:
+                layer.forward(layer.prev.output, training)
+                layer.inputs_b = layer.inputs.copy()
+
+            output_b = self.layers[-1].output
+
+            return np.stack([output_a, output_b], axis=1)
+
+        else:
+            self.input_layer.forward(X, training)
+
+            # Call forward method of every object in a chain
+            # Pass output of the previous object as a parameter
+            for layer in self.layers:
+                layer.forward(layer.prev.output, training)
+
+            # "layer" is now the last object from the list,
+            # return it's output
+            return layer.output
 
     # Performs backward pass
     def backward(self, output, y):
 
-        # First call backward method on the loss
-        # this will set dvalues property that the last
-        # layer will try to access shortly
+        # Backward pass through loss function to get initial dvalues
         self.loss.backward(output, y)
 
-        # Call backward method going through all the objects
-        # in reversed order passind dvalues as a parameter
-        for layer in reversed(self.layers):
-            layer.backward(layer.next.dvalues)
+        # Check dimensionality
+        if self.loss.dvalues.ndim == 3:
+            # Constrastive backpropogation (batch_size, 2, embedding_dim). Split out pairs
+            dvalues_a = self.loss.dvalues[:, 0, :]
+            dvalues_b = self.loss.dvalues[:, 1, :]
+            # === BACKWARD PASS A ===
+            for layer in self.layers:
+                layer.inputs = layer.inputs_a
+            # Backward from last to first
+            reversed_layers = list(reversed(self.layers))
+            reversed_layers[0].backward(dvalues_a)  # pass in explicitly to last layer
+            for i in range(1, len(reversed_layers)):
+                reversed_layers[i].backward(reversed_layers[i - 1].dvalues)
+
+            # === BACKWARD PASS B ===
+            for layer in self.layers:
+                layer.inputs = layer.inputs_b
+            reversed_layers[0].backward(dvalues_b)
+            for i in range(1, len(reversed_layers)):
+                reversed_layers[i].backward(reversed_layers[i - 1].dvalues)
+        else:
+            for layer in reversed(self.layers):
+
+                layer.backward(layer.next.dvalues)
 
 
 def generate_contrastive_pairs(X, y, num_pairs=100):
@@ -1036,7 +1075,7 @@ def generate_contrastive_pairs(X, y, num_pairs=100):
 if __name__ == "__main__":
 
     X = np.array([[0.9] * 3 for _ in range(20)] + [[0.1] * 3 for _ in range(20)]+ [[0.5] * 3 for _ in range(20)])
-    y = np.array([1] * 20 + [0] * 20 + [2] * 20)
+    y = np.array([1] * 20 + [0] * 20 + [0.5] * 20)
 
     pairs, pair_labels = generate_contrastive_pairs(X, y)
 
@@ -1058,9 +1097,22 @@ if __name__ == "__main__":
 
     network.finalize()
 
-    network.train(X=pairs, y=pair_labels, epochs=100, batch_size=128)
+    network.train(X=pairs, y=pair_labels, epochs=1, batch_size=128)
 
-    result_one = network.forward(X=np.array([0.9, 0.9, 0.9]), training=None)
-    print(np.argmax(result_one))
-    result_zero = network.forward(X=np.array([0.1, 0.1, 0.1]), training=None)
-    print(np.argmax(result_zero))
+    e1 = network.forward(np.array([0.9, 0.9, 0.9]), training=None)
+    e2 = network.forward(np.array([0.1, 0.1, 0.1]), training=None)
+    e3 = network.forward(np.array([0.5, 0.5, 0.5]), training=None)
+
+    print("Distance between 0.9 and 0.1:", np.linalg.norm(e1 - e2))
+    print("Distance between 0.9 and 0.5:", np.linalg.norm(e1 - e3))
+    print("Distance between 0.1 and 0.5:", np.linalg.norm(e2 - e3))
+
+    network.train(X=pairs, y=pair_labels, epochs=1000, batch_size=128)
+
+    e1 = network.forward(np.array([0.9, 0.9, 0.9]), training=None)
+    e2 = network.forward(np.array([0.1, 0.1, 0.1]), training=None)
+    e3 = network.forward(np.array([0.5, 0.5, 0.5]), training=None)
+
+    print("Distance between 0.9 and 0.1:", np.linalg.norm(e1 - e2))
+    print("Distance between 0.9 and 0.5:", np.linalg.norm(e1 - e3))
+    print("Distance between 0.1 and 0.5:", np.linalg.norm(e2 - e3))
