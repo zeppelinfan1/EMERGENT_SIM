@@ -550,6 +550,32 @@ class Loss_CategoricalCrossentropy(Loss):
         self.dvalues[range(samples), y_true] -= 1
         self.dvalues = self.dvalues / samples
 
+class Loss_SparseCategoricalCrossentropy(Loss):
+
+    # Forward pass
+    def forward(self, y_pred, y_true):
+
+        # Number of samples in a batch
+        samples = y_pred.shape[0]
+
+        # Clip data to prevent division by 0
+        # Clip both sides to not drag mean towards any value
+        y_pred_clipped = np.clip(y_pred, 1e-7, 1 - 1e-7)
+
+        correct_confidences = y_pred_clipped[range(samples), y_true]
+        negative_log_likelihoods = -np.log(correct_confidences)
+
+        return negative_log_likelihoods
+
+    # Backward pass
+    def backward(self, dvalues, y_true):
+
+        samples = dvalues.shape[0]
+        labels = dvalues.shape[1]
+
+        self.dvalues = dvalues.copy()
+        self.dvalues[range(samples), y_true] -= 1
+        self.dvalues = self.dvalues / samples
 
 # Binary cross-entropy loss
 class Loss_BinaryCrossentropy(Loss):
@@ -903,3 +929,35 @@ class Model:
         # in reversed order passind dvalues as a parameter
         for layer in reversed(self.layers):
             layer.backward(layer.next.dvalues)
+
+if __name__ == "__main__":
+
+    # Sample input data
+    input_data = [[0.9] * 3 for _ in range(20)] + [[0.1] * 3 for _ in range(20)]
+    target_data = [1] * 20 + [0] * 20
+
+    network = Model()
+
+    network.add(Layer_Dense(3, 512, weight_regularizer_l2=5e-4, bias_regularizer_l2=5e-4))
+    network.add(Activation_ReLU())
+    network.add(Layer_Dense(512, 512))
+    network.add(Activation_ReLU())
+    network.add(Layer_Dropout(rate=0.1))
+    network.add(Layer_Dense(512, 2))
+    network.add(Activation_Softmax())
+
+    # Set loss, optimizer and accuracy objects
+    network.set(
+        loss=Loss_SparseCategoricalCrossentropy(),
+        optimizer=Optimizer_Adam(decay=1e-7),
+        accuracy=Accuracy_Categorical()
+    )
+
+    network.finalize()
+
+    network.train(X=np.array(input_data), y=np.array(target_data), epochs=100, batch_size=128)
+
+    result_one = network.forward(X=np.array([0.9, 0.9, 0.9]), training=None)
+    print(np.argmax(result_one))
+    result_zero = network.forward(X=np.array([0.1, 0.1, 0.1]), training=None)
+    print(np.argmax(result_zero))
