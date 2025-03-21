@@ -57,6 +57,14 @@ class Layer_Dense:
         # Gradient on values
         self.dvalues = np.dot(dvalues, self.weights.T)
 
+    def predictions(self, outputs):
+
+        a = outputs[:, 0, :]
+        b = outputs[:, 1, :]
+        distances = np.linalg.norm(a - b, axis=1)
+
+        return distances < 0.5
+
 
 # Dropout
 class Layer_Dropout:
@@ -513,6 +521,64 @@ class Loss:
         self.accumulated_count = 0
 
 
+class Loss_Constrastive(Loss):
+
+    def __init__(self, margin=1.0):
+
+        self.margin = margin
+
+    def forward(self, y_pred, y_true):
+
+        # Split into anchor and paired embeddings
+        a, b = y_pred[:, 0, :], y_pred[:, 1, :]
+
+        # Compute Euclidean distances
+        distances = np.linalg.norm(a - b, axis=1)
+
+        # Compute losses
+        positive_loss = y_true * (distances ** 2)
+        negative_loss = (1 - y_true) * (np.maximum(0, self.margin - distances) ** 2)
+        losses = positive_loss + negative_loss
+
+        return losses
+
+    def backward(self, dvalues, y_true):
+
+        a = dvalues[:, 0, :]
+        b = dvalues[:, 1, :]
+
+        diff = a - b
+        distances = np.linalg.norm(diff, axis=1, keepdims=True)  # shape (batch_size, 1)
+
+        # Prevent division by zero
+        distances = np.maximum(distances, 1e-7)
+
+        # Gradients w.r.t. a and b
+        # For positive pairs (y=1), gradient is 2 * (a - b)
+        # For negative pairs (y=0), gradient is 2 * (margin - D) * -(a - b) / D
+
+        # Broadcast y_true to shape (batch_size, 1)
+        y_true = y_true.reshape(-1, 1)
+
+        # Compute masks
+        pos_mask = y_true
+        neg_mask = 1 - y_true
+        margin_term = np.maximum(0, self.margin - distances)
+
+        grad_pos = 2 * pos_mask * diff
+        grad_neg = -2 * neg_mask * margin_term * diff / distances
+
+        # Total gradients
+        grad = grad_pos + grad_neg
+
+        # Save gradients for both parts
+        self.dvalues = np.zeros_like(dvalues)
+        self.dvalues[:, 0, :] = grad  # ∂L/∂a
+        self.dvalues[:, 1, :] = -grad  # ∂L/∂b (opposite direction)
+
+        print(self.dvalues)
+
+
 # Cross-entropy loss
 class Loss_CategoricalCrossentropy(Loss):
 
@@ -675,6 +741,20 @@ class Accuracy:
         self.accumulated_sum = 0
         self.accumulated_count = 0
 
+
+class Accuracy_Constrastive(Accuracy):
+
+    def __init__(self, threshold=0.5):
+
+        self.threshold = threshold
+
+    def init(self, y):
+
+        pass
+
+    def compare(self, predictions, y):
+
+        return predictions == y
 
 # Accuracy calculation for classification model
 class Accuracy_Categorical(Accuracy):
@@ -930,11 +1010,40 @@ class Model:
         for layer in reversed(self.layers):
             layer.backward(layer.next.dvalues)
 
+
+def generate_contrastive_pairs(X, y, num_pairs=100):
+
+    pairs = []
+    labels = []
+
+    unique_classes = np.unique(y)
+
+    for _ in range(num_pairs):
+
+        if np.random.rand() < 0.5:
+            # Positive pair (same class)
+            label = 1
+            cls = np.random.choice(unique_classes)
+            indices = np.where(y == cls)[0]
+            a, b = np.random.choice(indices, size=2, replace=False)
+        else:
+            # Negative pair (different class)
+            label = 0
+            cls_a, cls_b = np.random.choice(unique_classes, size=2, replace=False)
+            a = np.random.choice(np.where(y == cls_a)[0])
+            b = np.random.choice(np.where(y == cls_b)[0])
+
+        pairs.append((X[a], X[b]))
+        labels.append(label)
+
+    return np.array(pairs), np.array(labels)
+
 if __name__ == "__main__":
 
-    # Sample input data
-    input_data = [[0.9] * 3 for _ in range(20)] + [[0.1] * 3 for _ in range(20)]
-    target_data = [1] * 20 + [0] * 20
+    X = np.array([[0.9] * 3 for _ in range(20)] + [[0.1] * 3 for _ in range(20)]+ [[0.5] * 3 for _ in range(20)])
+    y = np.array([1] * 20 + [0] * 20 + [2] * 20)
+
+    pairs, pair_labels = generate_contrastive_pairs(X, y)
 
     network = Model()
 
@@ -943,19 +1052,18 @@ if __name__ == "__main__":
     network.add(Layer_Dense(512, 512))
     network.add(Activation_ReLU())
     network.add(Layer_Dropout(rate=0.1))
-    network.add(Layer_Dense(512, 2))
-    network.add(Activation_Softmax())
+    network.add(Layer_Dense(512, 3))
 
     # Set loss, optimizer and accuracy objects
     network.set(
-        loss=Loss_SparseCategoricalCrossentropy(),
+        loss=Loss_Constrastive(),
         optimizer=Optimizer_Adam(decay=1e-7),
-        accuracy=Accuracy_Categorical()
+        accuracy=Accuracy_Constrastive()
     )
 
     network.finalize()
 
-    network.train(X=np.array(input_data), y=np.array(target_data), epochs=100, batch_size=128)
+    network.train(X=pairs, y=pair_labels, epochs=100, batch_size=128)
 
     result_one = network.forward(X=np.array([0.9, 0.9, 0.9]), training=None)
     print(np.argmax(result_one))
