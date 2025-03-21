@@ -306,7 +306,7 @@ if __name__ == "__main__":
                 feature_key = f"FEATURE:{feature.id}"
                 if feature_key not in subject.modular_networks.keys():
                     # So far only 1 input array for features networks with 1 element [numerous_features]
-                    subject.modular_networks[feature_key] = subject.initialize_brain(input_features=1)
+                    subject.modular_networks[feature_key] = subject.initialize_network(input_features=1)
 
                 input_data = []
                 target_data = []
@@ -331,7 +331,7 @@ if __name__ == "__main__":
                 alt_subject_key = f"SUBJECT:{alt_subject.id}"
                 if alt_subject_key not in subject.modular_networks.keys():
                     # So far only 1 input array for features networks with 1 element [numerous_features]
-                    subject.modular_networks[alt_subject_key] = subject.initialize_brain(input_features=1)
+                    subject.modular_networks[alt_subject_key] = subject.initialize_network(input_features=1)
 
                 # Gather training/target data for alternate subjects i.e. sensory network
                 # Check for presence of another feature - input data value

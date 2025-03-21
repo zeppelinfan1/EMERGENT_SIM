@@ -2,7 +2,7 @@
 import numpy as np
 import random
 from dataclasses import dataclass, field
-import Components.nn_brain as nn
+import Components.network as nn
 
 @dataclass
 class Genetics:
@@ -71,9 +71,9 @@ class Subject:
         self.id = Subject.last_subject
         self.genetics = Genetics(gene_number=self.gene_number, gene_length=self.gene_length)
         # Attention mechnism
-        self.modular_networks["ATTN"] = self.initialize_brain(input_features=1)
+        self.modular_networks["ATTN"] = self.initialize_network(input_features=1)
 
-    def initialize_brain(self, input_features):
+    def initialize_network(self, input_features):
 
         # Instantiate the model
         network = nn.Model()

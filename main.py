@@ -15,7 +15,7 @@ SUBJECT_PERCEPTION_RANGE = 3
 import pandas as pd, numpy as np
 from Components.environment import Environment
 from Components.subject import Subject
-from Components.nn_brain import Model
+from Components.network import Model
 from Components.db_api import DB_API
 
 
