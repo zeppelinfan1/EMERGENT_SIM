@@ -1116,3 +1116,22 @@ if __name__ == "__main__":
     print("Distance between 0.9 and 0.1:", np.linalg.norm(e1 - e2))
     print("Distance between 0.9 and 0.5:", np.linalg.norm(e1 - e3))
     print("Distance between 0.1 and 0.5:", np.linalg.norm(e2 - e3))
+
+    print(f"Input array: {np.array([0.9, 0.9, 0.9])}, embedding: {e1}")
+    print(f"Input array: {np.array([0.1, 0.1, 0.1])}, embedding: {e2}")
+    print(f"Input array: {np.array([0.5, 0.5, 0.5])}, embedding: {e3}")
+
+    """HEATMAP CODE
+    """
+    embeddings = []
+    for x in X:
+
+        out = network.forward(x, training=None)
+        embeddings.append(out[0])
+
+    embeddings = np.array(embeddings)  # Shape (60, 3)
+
+    for i in range(5):
+
+        print(f"Input: {X[i]}, Label: {y[i]}, Embedding: {embeddings[i]}")
+

@@ -56,6 +56,7 @@ class Subject:
     gene_number: int
     gene_length: int
     perception_range: int
+    feature_embedding_length: int = 3
     energy_change: int = 0
     energy: int = 100
     env_memory: dict = field(default_factory=dict)
@@ -71,15 +72,21 @@ class Subject:
         self.id = Subject.last_subject
         self.genetics = Genetics(gene_number=self.gene_number, gene_length=self.gene_length)
         # Attention mechnism
-        self.modular_networks["ATTN"] = self.initialize_network(input_features=1)
+        pass
 
-    def initialize_network(self, input_features):
+    def generate_new_embedding(self, name, length):
+
+        new_embedding = np.random.uniform(low=-1.0, high=1.0, size=(length,))
+        # Add to dict
+        self.feature_embeddings[name] = new_embedding
+
+    def initialize_network(self):
 
         # Instantiate the model
         network = nn.Model()
 
         # Add layers
-        network.add(nn.Layer_Dense(input_features, 512, weight_regularizer_l2=5e-4, bias_regularizer_l2=5e-4))
+        network.add(nn.Layer_Dense(self.feature_embedding_length, 512, weight_regularizer_l2=5e-4, bias_regularizer_l2=5e-4))
         network.add(nn.Activation_ReLU())
         network.add(nn.Layer_Dense(512, 512))
         network.add(nn.Activation_ReLU())
@@ -105,6 +112,8 @@ class Subject:
         self.env_memory.update(env_section)
 
 if __name__ == "__main__":
+
     subject1 = Subject(gene_number=6, gene_length=10, perception_range=2)
-    print(subject1)
+    subject1.generate_new_embedding(name="TEST", length=3)
+    print(subject1.feature_embeddings)
 
