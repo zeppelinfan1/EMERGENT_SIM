@@ -1104,23 +1104,12 @@ if __name__ == "__main__":
     e2 = network.forward(np.array([0.1, 0.1, 0.1]), training=None)
     e3 = network.forward(np.array([0.5, 0.5, 0.5]), training=None)
 
-    print("Distance between 0.9 and 0.1:", np.linalg.norm(e1 - e2))
-    print("Distance between 0.9 and 0.5:", np.linalg.norm(e1 - e3))
-    print("Distance between 0.1 and 0.5:", np.linalg.norm(e2 - e3))
-
-    network.train(X=pairs, y=pair_labels, epochs=1000, batch_size=128)
-
-    e1 = network.forward(np.array([0.9, 0.9, 0.9]), training=None)
-    e2 = network.forward(np.array([0.1, 0.1, 0.1]), training=None)
-    e3 = network.forward(np.array([0.5, 0.5, 0.5]), training=None)
-
-    print("Distance between 0.9 and 0.1:", np.linalg.norm(e1 - e2))
-    print("Distance between 0.9 and 0.5:", np.linalg.norm(e1 - e3))
-    print("Distance between 0.1 and 0.5:", np.linalg.norm(e2 - e3))
-
     print(f"Input array: {np.array([0.9, 0.9, 0.9])}, embedding: {e1}")
+    print("Distance between 0.9 and 0.1:", np.linalg.norm(e1 - e2))
     print(f"Input array: {np.array([0.1, 0.1, 0.1])}, embedding: {e2}")
+    print("Distance between 0.9 and 0.5:", np.linalg.norm(e1 - e3))
     print(f"Input array: {np.array([0.5, 0.5, 0.5])}, embedding: {e3}")
+    print("Distance between 0.1 and 0.5:", np.linalg.norm(e2 - e3))
 
     """HEATMAP CODE
     """
@@ -1138,7 +1127,6 @@ if __name__ == "__main__":
     # Update new points into map
     for i in range(len(X)):
 
-        print(f"Input: {X[i]}, Label: {y[i]}, Embedding: {embeddings[i]}")
         map.update(embeddings[i], y[i])
 
     for i in range(len(X)):
@@ -1146,3 +1134,39 @@ if __name__ == "__main__":
         score = map.score(embeddings[i])
         print(f"Input: {X[i]}, Label: {y[i]}, Embedding: {embeddings[i]}, Predicted Label: {score}")
 
+
+    network.train(X=pairs, y=pair_labels, epochs=2000, batch_size=128)
+
+    e1 = network.forward(np.array([0.9, 0.9, 0.9]), training=None)
+    e2 = network.forward(np.array([0.1, 0.1, 0.1]), training=None)
+    e3 = network.forward(np.array([0.5, 0.5, 0.5]), training=None)
+
+    print(f"Input array: {np.array([0.9, 0.9, 0.9])}, embedding: {e1}")
+    print("Distance between 0.9 and 0.1:", np.linalg.norm(e1 - e2))
+    print(f"Input array: {np.array([0.1, 0.1, 0.1])}, embedding: {e2}")
+    print("Distance between 0.9 and 0.5:", np.linalg.norm(e1 - e3))
+    print(f"Input array: {np.array([0.5, 0.5, 0.5])}, embedding: {e3}")
+    print("Distance between 0.1 and 0.5:", np.linalg.norm(e2 - e3))
+
+    """HEATMAP CODE
+    """
+    embeddings = []
+    for x in X:
+
+        out = network.forward(x, training=None)
+        embeddings.append(out[0])
+
+    embeddings = np.array(embeddings)  # Shape (60, 3)
+
+    # Create instance of embedding heatmap
+    map = Mapping()
+
+    # Update new points into map
+    for i in range(len(X)):
+
+        map.update(embeddings[i], y[i])
+
+    for i in range(len(X)):
+
+        score = map.score(embeddings[i])
+        print(f"Input: {X[i]}, Label: {y[i]}, Embedding: {embeddings[i]}, Predicted Label: {score}")
