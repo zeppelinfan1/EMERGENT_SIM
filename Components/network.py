@@ -1077,6 +1077,8 @@ if __name__ == "__main__":
 
     X = np.array([[0.9] * 3 for _ in range(20)] + [[0.1] * 3 for _ in range(20)]+ [[0.5] * 3 for _ in range(20)])
     y = np.array([1] * 20 + [0] * 20 + [0.5] * 20)
+    X_test = np.array([[0.9, 0.9, 0.9], [0.1, 0.1, 0.1], [0.5, 0.5, 0.5]])
+    y_test = np.array([1, 0, 0.5])
 
     pairs, pair_labels = generate_contrastive_pairs(X, y)
 
@@ -1099,6 +1101,7 @@ if __name__ == "__main__":
     network.finalize()
 
     network.train(X=pairs, y=pair_labels, epochs=1, batch_size=128)
+    print("Before training:")
 
     e1 = network.forward(np.array([0.9, 0.9, 0.9]), training=None)
     e2 = network.forward(np.array([0.1, 0.1, 0.1]), training=None)
@@ -1114,12 +1117,19 @@ if __name__ == "__main__":
     """HEATMAP CODE
     """
     embeddings = []
+    embeddings_test = []
     for x in X:
 
         out = network.forward(x, training=None)
         embeddings.append(out[0])
 
+    for x in X_test:
+
+        out = network.forward(x, training=None)
+        embeddings_test.append(out[0])
+
     embeddings = np.array(embeddings)  # Shape (60, 3)
+    embeddings_test = np.array(embeddings_test)  # Shape (60, 3)
 
     # Create instance of embedding heatmap
     map = Mapping()
@@ -1129,14 +1139,15 @@ if __name__ == "__main__":
 
         map.update(embeddings[i], y[i])
 
-    for i in range(len(X)):
+    for i in range(len(X_test)):
 
-        score = map.score(embeddings[i])
-        print(f"Input: {X[i]}, Label: {y[i]}, Embedding: {embeddings[i]}, Predicted Label: {score}")
+        score = map.score(embeddings_test[i])
+        print(f"Input: {X_test[i]}, Label: {y_test[i]}, Embedding: {embeddings_test[i]}, Predicted Label: {score}")
 
 
-    network.train(X=pairs, y=pair_labels, epochs=2000, batch_size=128)
+    network.train(X=pairs, y=pair_labels, epochs=1000, batch_size=128)
 
+    print("After training:")
     e1 = network.forward(np.array([0.9, 0.9, 0.9]), training=None)
     e2 = network.forward(np.array([0.1, 0.1, 0.1]), training=None)
     e3 = network.forward(np.array([0.5, 0.5, 0.5]), training=None)
@@ -1149,24 +1160,27 @@ if __name__ == "__main__":
     print("Distance between 0.1 and 0.5:", np.linalg.norm(e2 - e3))
 
     """HEATMAP CODE
-    """
+        """
     embeddings = []
+    embeddings_test = []
     for x in X:
-
         out = network.forward(x, training=None)
         embeddings.append(out[0])
 
+    for x in X_test:
+        out = network.forward(x, training=None)
+        embeddings_test.append(out[0])
+
     embeddings = np.array(embeddings)  # Shape (60, 3)
+    embeddings_test = np.array(embeddings_test)  # Shape (60, 3)
 
     # Create instance of embedding heatmap
     map = Mapping()
 
     # Update new points into map
     for i in range(len(X)):
-
         map.update(embeddings[i], y[i])
 
-    for i in range(len(X)):
-
-        score = map.score(embeddings[i])
-        print(f"Input: {X[i]}, Label: {y[i]}, Embedding: {embeddings[i]}, Predicted Label: {score}")
+    for i in range(len(X_test)):
+        score = map.score(embeddings_test[i])
+        print(f"Input: {X_test[i]}, Label: {y_test[i]}, Embedding: {embeddings_test[i]}, Predicted Label: {score}")
