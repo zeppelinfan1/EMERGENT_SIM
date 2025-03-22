@@ -1,6 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import os, cv2, urllib, urllib.request, zipfile
+from Components.mapping import Mapping
 
 
 # Dense layer
@@ -1024,7 +1025,7 @@ class Model:
             # Constrastive backpropogation (batch_size, 2, embedding_dim). Split out pairs
             dvalues_a = self.loss.dvalues[:, 0, :]
             dvalues_b = self.loss.dvalues[:, 1, :]
-            # === BACKWARD PASS A ===
+            # Backward pass for a
             for layer in self.layers:
                 layer.inputs = layer.inputs_a
             # Backward from last to first
@@ -1033,7 +1034,7 @@ class Model:
             for i in range(1, len(reversed_layers)):
                 reversed_layers[i].backward(reversed_layers[i - 1].dvalues)
 
-            # === BACKWARD PASS B ===
+            # Backward pass for b
             for layer in self.layers:
                 layer.inputs = layer.inputs_b
             reversed_layers[0].backward(dvalues_b)
@@ -1131,7 +1132,17 @@ if __name__ == "__main__":
 
     embeddings = np.array(embeddings)  # Shape (60, 3)
 
-    for i in range(5):
+    # Create instance of embedding heatmap
+    map = Mapping()
+
+    # Update new points into map
+    for i in range(len(X)):
 
         print(f"Input: {X[i]}, Label: {y[i]}, Embedding: {embeddings[i]}")
+        map.update(embeddings[i], y[i])
+
+    for i in range(len(X)):
+
+        score = map.score(embeddings[i])
+        print(f"Input: {X[i]}, Label: {y[i]}, Embedding: {embeddings[i]}, Predicted Label: {score}")
 
