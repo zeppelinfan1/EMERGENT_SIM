@@ -56,14 +56,14 @@ class Square:
         Square.last_id += 1
         self.id = Square.last_id # Assigns unique value
 
-    def add_object(self, obj):
+    def add_feature(self, feature):
 
-        self.objects.append(obj)
+        self.features.append(feature)
 
-    def remove_object(self, obj):
+    def remove_feature(self, feature):
 
-        if obj in self.objects:
-            self.objects.remove(obj)
+        if feature in self.features:
+            self.features.remove(feature)
 
 @dataclass
 class Environment:
@@ -117,10 +117,10 @@ class Environment:
                     feature_dict[var_value.type].append(var_value)
 
         # Loop through keys
-        for type in feature_dict.keys():
+        for feature_type in feature_dict.keys():
 
             # Gather values and loop to sum up total probability
-            value_list = feature_dict[type]
+            value_list = feature_dict[feature_type]
             total_probability = 0
             for obs in value_list:
 
@@ -203,8 +203,8 @@ class Environment:
 
             for dy in range(-perception_range, perception_range + 1):
 
-                new_position = (position.x + dx, position.y + dy)  # ✅ Tuple format
-                square = self.square_map.get(new_position)  # ✅ Lookup using tuple
+                new_position = (position.x + dx, position.y + dy)  # Tuple format
+                square = self.square_map.get(new_position)  # Lookup using tuple
                 if square: neighbors.append(square)
 
         return neighbors
@@ -213,9 +213,6 @@ class Environment:
 
         input_data = [] # 1 hot for features for each square in environment
         target_data = [] # Based on feature memory
-
-        # Number of features, for 1 hot encodings
-        feature_num = len(feature_memory.values())
 
         # Loop through squares
         for square in env_memory.values():
@@ -303,60 +300,22 @@ if __name__ == "__main__":
 
             for feature in square_features:
 
-                feature_key = f"FEATURE:{feature.id}"
-                if feature_key not in subject.modular_networks.keys():
-                    # So far only 1 input array for features networks with 1 element [numerous_features]
-                    subject.modular_networks[feature_key] = subject.initialize_network(input_features=1)
+                feature_key = f"F:{feature.id}"
+                if feature_key not in subject.feature_embeddings:
+                    # Create unique embedding and add it to dict
+                    subject.generate_new_embedding(name=feature_key)
 
-                input_data = []
-                target_data = []
-                # Check for presence of another feature - input data value
-                numerous_features = 1 if len(square.features) > 1 else 0
-                input_data.append([numerous_features])
-                # Check for energy change - target data value
-                energy_change = (subject.energy_change + 100) / 200
-                target_data.append([energy_change])
+                # Check for presence of numerous_features
+                numerous_features = [1] if len(square.features) > 1 else [0]
 
-                # Train network
-                subject.modular_networks[feature_key].train(X=np.array(input_data), y=np.array(target_data), epochs=10, batch_size=128)
+                # Concat numerous features value to list
+                embedding = [float(x) for x in subject.feature_embeddings[feature_key]]
+                input_data = embedding + numerous_features
 
-            # Check for squares occupied by other subjects and prep modular network if needed
-            env_subject_squares = [square for square in perceivable_env.values() if square.subject is not None
-                                   and square.subject is not subject] # Not the subject itself
-            input_data = []
-            target_data = []
-            for alt_square in env_subject_squares:
+                # Check for observed energy change i.e. target value
+                target_data = [(subject.energy_change + 100) / 200]
 
-                alt_subject = alt_square.subject
-                alt_subject_key = f"SUBJECT:{alt_subject.id}"
-                if alt_subject_key not in subject.modular_networks.keys():
-                    # So far only 1 input array for features networks with 1 element [numerous_features]
-                    subject.modular_networks[alt_subject_key] = subject.initialize_network(input_features=1)
-
-                # Gather training/target data for alternate subjects i.e. sensory network
-                # Check for presence of another feature - input data value
-                alt_numerous_features = 1 if len(alt_square.features) > 1 else 0
-                input_data.append([alt_numerous_features])
-                # Check for energy change - target data value
-                energy_change = (alt_subject.energy_change + 100) / 200
-                target_data.append([energy_change])
-
-                subject.modular_networks[alt_subject_key].train(X=np.array(input_data), y=np.array(target_data), epochs=10,
-                                                        batch_size=128)
-
-            # Forward pass through modular networks in order to get Attention Mechanism training data
-            for current_feature in square.features:
-
-                output = subject.modular_networks[f"FEATURE:{current_feature.id}"].forward(X=np.array(numerous_features), training=None)
-                # subject.modular_networks["ATTN"].train(X=np.array())
-
-            """PLAN ASSESSMENT
-            """
-            # Loop through each square in subject memory
-            for square_id, square_data in subject.env_memory.items():
-
-                # Gather input data
-                pass
+                # Generate constrastive pairs
 
 
 
@@ -364,3 +323,56 @@ if __name__ == "__main__":
 
 
 
+
+
+
+            #
+            #     input_data = []
+            #     target_data = []
+            #     # Check for presence of another feature - input data value
+            #     numerous_features = 1 if len(square.features) > 1 else 0
+            #     input_data.append([numerous_features])
+            #     # Check for energy change - target data value
+            #     energy_change = (subject.energy_change + 100) / 200
+            #     target_data.append([energy_change])
+            #
+            #     # Train network
+            #     subject.modular_networks[feature_key].train(X=np.array(input_data), y=np.array(target_data), epochs=10, batch_size=128)
+            #
+            # # Check for squares occupied by other subjects and prep modular network if needed
+            # env_subject_squares = [square for square in perceivable_env.values() if square.subject is not None
+            #                        and square.subject is not subject] # Not the subject itself
+            # input_data = []
+            # target_data = []
+            # for alt_square in env_subject_squares:
+            #
+            #     alt_subject = alt_square.subject
+            #     alt_subject_key = f"SUBJECT:{alt_subject.id}"
+            #     if alt_subject_key not in subject.modular_networks.keys():
+            #         # So far only 1 input array for features networks with 1 element [numerous_features]
+            #         subject.modular_networks[alt_subject_key] = subject.initialize_network(input_features=1)
+            #
+            #     # Gather training/target data for alternate subjects i.e. sensory network
+            #     # Check for presence of another feature - input data value
+            #     alt_numerous_features = 1 if len(alt_square.features) > 1 else 0
+            #     input_data.append([alt_numerous_features])
+            #     # Check for energy change - target data value
+            #     energy_change = (alt_subject.energy_change + 100) / 200
+            #     target_data.append([energy_change])
+            #
+            #     subject.modular_networks[alt_subject_key].train(X=np.array(input_data), y=np.array(target_data), epochs=10,
+            #                                             batch_size=128)
+            #
+            # # Forward pass through modular networks in order to get Attention Mechanism training data
+            # for current_feature in square.features:
+            #
+            #     output = subject.modular_networks[f"FEATURE:{current_feature.id}"].forward(X=np.array(numerous_features), training=None)
+            #     # subject.modular_networks["ATTN"].train(X=np.array())
+            #
+            # """PLAN ASSESSMENT
+            # """
+            # # Loop through each square in subject memory
+            # for square_id, square_data in subject.env_memory.items():
+            #
+            #     # Gather input data
+            #     pass

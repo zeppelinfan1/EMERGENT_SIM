@@ -54,17 +54,21 @@ class Genetics:
 class Subject:
 
     id: int = field(init=False)
+    # Genetics information
     gene_number: int
     gene_length: int
+    # Environmental related paramaters
     perception_range: int
-    feature_embedding_length: int = 3
+    env_memory: dict = field(default_factory=dict)
+    # Subject paramaters
     energy_change: int = 0
     energy: int = 100
-    env_memory: dict = field(default_factory=dict)
-    feature_embeddings: dict = field(default_factory=dict)
-    feature_mapping: dict = field(default_factory=dict)
-    modular_networks: dict = field(default_factory=dict)
     genetics: Genetics = field(init=False) # Created in post init
+    # Features network paramaters
+    feature_embedding_length: int = 4 # Length of 3 for embeddings + 1 for numerous_features 1 hot encoding = 4
+    feature_embeddings: dict = field(default_factory=dict)
+    feature_network: nn.Model = field(init=False)
+    feature_mapping: dict = field(default_factory=dict)
 
     last_subject = 0
 
@@ -73,10 +77,10 @@ class Subject:
         Subject.last_subject += 1
         self.id = Subject.last_subject
         self.genetics = Genetics(gene_number=self.gene_number, gene_length=self.gene_length)
-        # Attention mechnism
-        pass
+        # Network initialization
+        self.feature_network = self.initialize_network()
 
-    def generate_new_embedding(self, name, length):
+    def generate_new_embedding(self, name, length=3):
 
         new_embedding = np.random.uniform(low=-1.0, high=1.0, size=(length,))
         # Add to dict
@@ -93,17 +97,15 @@ class Subject:
         network.add(nn.Layer_Dense(512, 512))
         network.add(nn.Activation_ReLU())
         network.add(nn.Layer_Dropout(rate=0.1))
-        network.add(nn.Layer_Dense(512, 1))
-        network.add(nn.Activation_Linear())
+        network.add(nn.Layer_Dense(512, 4))
 
         # Set loss, optimizer and accuracy objects
         network.set(
-            loss=nn.Loss_MeanSquaredError(),
+            loss=nn.Loss_Constrastive(),
             optimizer=nn.Optimizer_Adam(decay=1e-7),
-            accuracy=nn.Accuracy_Categorical()
+            accuracy=nn.Accuracy_Constrastive()
         )
 
-        # Finalize
         network.finalize()
 
         return network

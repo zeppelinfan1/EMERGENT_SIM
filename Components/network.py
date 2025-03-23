@@ -1045,33 +1045,32 @@ class Model:
 
                 layer.backward(layer.next.dvalues)
 
+    def generate_contrastive_pairs(X, y, num_pairs=100):
 
-def generate_contrastive_pairs(X, y, num_pairs=100):
+        pairs = []
+        labels = []
 
-    pairs = []
-    labels = []
+        unique_classes = np.unique(y)
 
-    unique_classes = np.unique(y)
+        for _ in range(num_pairs):
 
-    for _ in range(num_pairs):
+            if np.random.rand() < 0.5:
+                # Positive pair (same class)
+                label = 1
+                cls = np.random.choice(unique_classes)
+                indices = np.where(y == cls)[0]
+                a, b = np.random.choice(indices, size=2, replace=False)
+            else:
+                # Negative pair (different class)
+                label = 0
+                cls_a, cls_b = np.random.choice(unique_classes, size=2, replace=False)
+                a = np.random.choice(np.where(y == cls_a)[0])
+                b = np.random.choice(np.where(y == cls_b)[0])
 
-        if np.random.rand() < 0.5:
-            # Positive pair (same class)
-            label = 1
-            cls = np.random.choice(unique_classes)
-            indices = np.where(y == cls)[0]
-            a, b = np.random.choice(indices, size=2, replace=False)
-        else:
-            # Negative pair (different class)
-            label = 0
-            cls_a, cls_b = np.random.choice(unique_classes, size=2, replace=False)
-            a = np.random.choice(np.where(y == cls_a)[0])
-            b = np.random.choice(np.where(y == cls_b)[0])
+            pairs.append((X[a], X[b]))
+            labels.append(label)
 
-        pairs.append((X[a], X[b]))
-        labels.append(label)
-
-    return np.array(pairs), np.array(labels)
+        return np.array(pairs), np.array(labels)
 
 if __name__ == "__main__":
 
@@ -1080,9 +1079,9 @@ if __name__ == "__main__":
     X_test = np.array([[0.9, 0.9, 0.9], [0.1, 0.1, 0.1], [0.5, 0.5, 0.5]])
     y_test = np.array([1, 0, 0.5])
 
-    pairs, pair_labels = generate_contrastive_pairs(X, y)
-
     network = Model()
+
+    pairs, pair_labels = network.generate_contrastive_pairs(X, y)
 
     network.add(Layer_Dense(3, 512, weight_regularizer_l2=5e-4, bias_regularizer_l2=5e-4))
     network.add(Activation_ReLU())
