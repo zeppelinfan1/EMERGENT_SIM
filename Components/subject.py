@@ -3,6 +3,7 @@ import numpy as np
 import random
 from dataclasses import dataclass, field
 import Components.network as nn
+import Components.mapping as mapping
 
 @dataclass
 class Genetics:
@@ -61,6 +62,7 @@ class Subject:
     energy: int = 100
     env_memory: dict = field(default_factory=dict)
     feature_embeddings: dict = field(default_factory=dict)
+    feature_mapping: dict = field(default_factory=dict)
     modular_networks: dict = field(default_factory=dict)
     genetics: Genetics = field(init=False) # Created in post init
 
