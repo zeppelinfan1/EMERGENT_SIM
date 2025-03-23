@@ -259,7 +259,7 @@ class Environment:
 if __name__ == "__main__":
 
     MAX_ITERATIONS = 1
-    NUM_SUBJECTS = 1
+    NUM_SUBJECTS = 100
 
     env = Environment(width=50, height=20)
 
@@ -295,8 +295,13 @@ if __name__ == "__main__":
 
             """ FEATURE NEURAL NETWORK RETRAINING
             """
+            final_input_data = []
+            final_target_data = []
             # Check for newly encountered features and prep modular network if needed
             square_features = [feature for feature in square.features]
+
+            # Check for presence of numerous_features
+            numerous_features = [1] if len(square.features) > 1 else [0]
 
             for feature in square_features:
 
@@ -305,18 +310,52 @@ if __name__ == "__main__":
                     # Create unique embedding and add it to dict
                     subject.generate_new_embedding(name=feature_key)
 
-                # Check for presence of numerous_features
-                numerous_features = [1] if len(square.features) > 1 else [0]
-
-                # Concat numerous features value to list
+                # Concat numerous features and 'personal observation' values to list
                 embedding = [float(x) for x in subject.feature_embeddings[feature_key]]
-                input_data = embedding + numerous_features
+                input_data = embedding + numerous_features + [0] # [0] signifies 'personally observed'
 
                 # Check for observed energy change i.e. target value
                 target_data = [(subject.energy_change + 100) / 200]
 
-                # Generate constrastive pairs
+                # Append to final
+                final_input_data.append(input_data)
+                final_target_data.append(target_data)
 
+            # Check for squares occupied by other subjects and prep modular network if needed
+            alternate_subject_squares = [square for square in perceivable_env.values() if square.subject is not None
+                                         and square.subject is not subject] # Not the subject itself
+
+            for alternate_subject_square in alternate_subject_squares:
+
+                # Keep track of the alternate subject
+                alternate_subject = alternate_subject_square.subject
+
+                # Check for presence of numerous_features
+                alternate_numerous_features = [1] if len(alternate_subject_square.features) > 1 else [0]
+
+                # Loop through features within alternate square
+                for alternate_feature in alternate_subject_square.features:
+
+                    # Ensure feature embedding exists
+                    alternate_feature_key = f"F:{alternate_feature.id}"
+                    if alternate_feature_key not in subject.feature_embeddings:
+                        # Create unique embedding and add it to dict
+                        subject.generate_new_embedding(name=alternate_feature_key)
+                        print(alternate_feature_key)
+
+                    # Gather input/target data
+                    alternate_embedding = [float(x) for x in subject.feature_embeddings[alternate_feature_key]]
+                    alternate_input_data = alternate_embedding + alternate_numerous_features + [1] # [1] signifies perceived
+
+                    # Check for observed energy change i.e. target value
+                    alternate_target_data = [(alternate_subject.energy_change + 100) / 200]
+
+                    # Append
+                    final_input_data.append(alternate_input_data)
+                    final_target_data.append(alternate_target_data)
+
+            print(final_input_data)
+            print(final_target_data)
 
 
 

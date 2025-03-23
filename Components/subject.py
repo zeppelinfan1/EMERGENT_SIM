@@ -69,6 +69,7 @@ class Subject:
     feature_embeddings: dict = field(default_factory=dict)
     feature_network: nn.Model = field(init=False)
     feature_mapping: dict = field(default_factory=dict)
+    feature_memory: dict = field(default_factory=dict)
 
     last_subject = 0
 
@@ -82,7 +83,7 @@ class Subject:
 
     def generate_new_embedding(self, name, length=3):
 
-        new_embedding = np.random.uniform(low=-1.0, high=1.0, size=(length,))
+        new_embedding = np.random.uniform(low=0.0, high=1.0, size=(length,))
         # Add to dict
         self.feature_embeddings[name] = new_embedding
 
