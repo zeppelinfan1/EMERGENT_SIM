@@ -293,7 +293,7 @@ if __name__ == "__main__":
             # Update memory
             subject.update_memory(perceivable_env)
 
-            """ FEATURE NEURAL NETWORK RETRAINING
+            """ FEATURE NEURAL NETWORK DATA GATHERING
             """
             final_input_data = []
             final_target_data = []
@@ -341,7 +341,6 @@ if __name__ == "__main__":
                     if alternate_feature_key not in subject.feature_embeddings:
                         # Create unique embedding and add it to dict
                         subject.generate_new_embedding(name=alternate_feature_key)
-                        print(alternate_feature_key)
 
                     # Gather input/target data
                     alternate_embedding = [float(x) for x in subject.feature_embeddings[alternate_feature_key]]
@@ -354,11 +353,17 @@ if __name__ == "__main__":
                     final_input_data.append(alternate_input_data)
                     final_target_data.append(alternate_target_data)
 
-            print(final_input_data)
-            print(final_target_data)
+            # Add to memory
+            subject.feature_memory.add(embedding=final_input_data, label=final_target_data)
 
-
-
+            """ FEATURE NEURAL NETWORK DATA TRAINING
+            """
+            # Gather full training data from memory
+            X, y = subject.feature_memory.get_embeddings()
+            # Constrastive pairs
+            pairs, pair_labels = subject.feature_network.generate_contrastive_pairs(X, y)
+            # Train
+            subject.feature_network.train(X=pairs, y=pair_labels, epochs=1, batch_size=128)
 
 
 

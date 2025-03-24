@@ -57,9 +57,54 @@ class Memory:
     max_observations: int = 200
     memory: OrderedDict = field(default_factory=OrderedDict)
 
-    def add(self, embedding, label):
+    def total_weight(self):
 
-        pass
+        return sum(self.memory.values())
+
+    def add(self, embedding, label, increment=None, decay=0.99):
+
+        # Loop through list of values
+        for single_embedding, single_label in zip(embedding, label):
+
+            key = tuple([float(single_label[0])] + list(single_embedding))
+
+            if increment is None:
+                increment = 1.0 / self.max_observations
+
+            if key in self.memory:
+                self.memory[key] += increment
+            else:
+                if self.total_weight() >= 1.0:
+
+                    # Decay all weights to make room
+                    for k in list(self.memory.keys()):
+
+                        self.memory[k] *= decay
+
+                    # Clean up very small entries
+                    self.memory = OrderedDict((k, v) for k, v in self.memory.items() if v > 1e-6)
+
+                self.memory[key] = increment
+
+    def get_embeddings(self):
+
+        embeddings = []
+        labels = []
+
+        for key, weight in self.memory.items():
+
+            label = key[0]
+            embedding = np.array(key[1:])
+
+            # Convert weight into a number of samples
+            count = int(round(weight * self.max_observations))
+
+            for _ in range(count):
+
+                embeddings.append(embedding)
+                labels.append(label)
+
+        return np.array(embeddings), np.array(labels)
 
 @dataclass
 class Subject:
@@ -76,7 +121,7 @@ class Subject:
     energy: int = 100
     genetics: Genetics = field(init=False) # Created in post init
     # Features network paramaters
-    feature_embedding_length: int = 4 # Length of 3 for embeddings + 1 for numerous_features 1 hot encoding = 4
+    feature_embedding_length: int = 5 # Length of 3 for embeddings + 1 for numerous_features + 1 personal/observed = 5
     feature_embeddings: dict = field(default_factory=dict)
     feature_network: nn.Model = field(init=False)
     feature_mapping: dict = field(default_factory=dict)
@@ -91,6 +136,8 @@ class Subject:
         self.genetics = Genetics(gene_number=self.gene_number, gene_length=self.gene_length)
         # Network initialization
         self.feature_network = self.initialize_network()
+        # Memory
+        self.feature_memory = Memory()
 
     def generate_new_embedding(self, name, length=3):
 

@@ -853,6 +853,8 @@ class Model:
     # Train the model
     def train(self, X, y, *, epochs=1, batch_size=None, print_every=1, validation_data=None):
 
+        if len(X) == 0 or len(y) == 0: return
+
         # Initialize accuracy object
         self.accuracy.init(y)
 
@@ -1045,7 +1047,7 @@ class Model:
 
                 layer.backward(layer.next.dvalues)
 
-    def generate_contrastive_pairs(X, y, num_pairs=100):
+    def generate_contrastive_pairs(self, X, y, num_pairs=100):
 
         pairs = []
         labels = []
@@ -1056,16 +1058,24 @@ class Model:
 
             if np.random.rand() < 0.5:
                 # Positive pair (same class)
-                label = 1
                 cls = np.random.choice(unique_classes)
                 indices = np.where(y == cls)[0]
+                if len(indices) < 2:
+                    continue
                 a, b = np.random.choice(indices, size=2, replace=False)
+                label = 1
             else:
-                # Negative pair (different class)
-                label = 0
+                # Negative pair (different classes)
+                if len(unique_classes) < 2:
+                    continue  # Not enough distinct classes for negative pair
                 cls_a, cls_b = np.random.choice(unique_classes, size=2, replace=False)
-                a = np.random.choice(np.where(y == cls_a)[0])
-                b = np.random.choice(np.where(y == cls_b)[0])
+                indices_a = np.where(y == cls_a)[0]
+                indices_b = np.where(y == cls_b)[0]
+                if len(indices_a) < 1 or len(indices_b) < 1:
+                    continue
+                a = np.random.choice(indices_a)
+                b = np.random.choice(indices_b)
+                label = 0
 
             pairs.append((X[a], X[b]))
             labels.append(label)
