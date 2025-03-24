@@ -2,6 +2,7 @@
 import numpy as np
 import random
 from dataclasses import dataclass, field
+from collections import OrderedDict
 import Components.network as nn
 import Components.mapping as mapping
 
@@ -51,6 +52,16 @@ class Genetics:
         return f"Genetics(gene_number={self.gene_number}, gene_length={self.gene_length}, genes={self.genes}, mapping={self.mapping})"
 
 @dataclass
+class Memory:
+
+    max_observations: int = 200
+    memory: OrderedDict = field(default_factory=OrderedDict)
+
+    def add(self, embedding, label):
+
+        pass
+
+@dataclass
 class Subject:
 
     id: int = field(init=False)
@@ -69,7 +80,7 @@ class Subject:
     feature_embeddings: dict = field(default_factory=dict)
     feature_network: nn.Model = field(init=False)
     feature_mapping: dict = field(default_factory=dict)
-    feature_memory: dict = field(default_factory=dict)
+    feature_memory: Memory = field(init=False)
 
     last_subject = 0
 
