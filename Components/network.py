@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import os, cv2, urllib, urllib.request, zipfile
-from Components.mapping import Mapping
+from Components.mapping import Map
 
 
 # Dense layer
@@ -1141,7 +1141,7 @@ if __name__ == "__main__":
     embeddings_test = np.array(embeddings_test)  # Shape (60, 3)
 
     # Create instance of embedding heatmap
-    map = Mapping()
+    map = Map()
 
     # Update new points into map
     for i in range(len(X)):
@@ -1184,7 +1184,7 @@ if __name__ == "__main__":
     embeddings_test = np.array(embeddings_test)  # Shape (60, 3)
 
     # Create instance of embedding heatmap
-    map = Mapping()
+    map = Map()
 
     # Update new points into map
     for i in range(len(X)):

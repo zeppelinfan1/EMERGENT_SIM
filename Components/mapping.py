@@ -1,6 +1,6 @@
 import numpy as np
 
-class Mapping:
+class Map:
 
     def __init__(self, embedding_dim=3, decay_rate=0.95):
 

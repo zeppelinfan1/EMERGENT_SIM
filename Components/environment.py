@@ -96,7 +96,7 @@ class Environment:
 
                 # Create square
                 new_square = Square(position=pos, features=feature_list)
-                self.square_map[(pos.x, pos.y)] = new_square
+                self.square_map[new_square.id] = new_square
 
     def initialize_features(self):
 
@@ -259,7 +259,7 @@ class Environment:
 if __name__ == "__main__":
 
     MAX_ITERATIONS = 1
-    NUM_SUBJECTS = 1
+    NUM_SUBJECTS = 10
 
     env = Environment(width=50, height=20)
 
@@ -281,6 +281,8 @@ if __name__ == "__main__":
             total_energy_change = sum([feature.energy_change for feature in square.features])
             subject.energy_change = total_energy_change
             subject.energy += total_energy_change
+            if total_energy_change > 0:
+                print(f"Subject: {subject.id} experienced {total_energy_change} energy change.")
 
         for square in occupied_squares:
 
@@ -365,6 +367,11 @@ if __name__ == "__main__":
             # Train
             subject.feature_network.train(X=pairs, y=pair_labels, epochs=1, batch_size=128)
 
+            # Update mapping
+            for i in range(len(X)):
+
+                subject.feature_mapping.update(X[i], y[i])
+
             """SQUARE PREDICTION
             """
             prediction_d = {}
@@ -382,15 +389,29 @@ if __name__ == "__main__":
                     square_input_data = list(feature_embedding) + numerous_features + [0]
 
                     # Forward pass
-                    output = subject.feature_network.forward(X=np.array(input_data), training=None)
+                    output = subject.feature_network.forward(X=np.array(square_input_data), training=None)
 
                     # Gather heat map value
-                    pass
+                    mapping_pred = subject.feature_mapping.score(feature_embedding)
 
+                    if not subject_square_id in prediction_d.keys():
+                        prediction_d[subject_square_id] = mapping_pred
+                    else:
+                        prediction_d[subject_square_id] += float(mapping_pred)
 
+            """SUBJECT ACTION
+            """
+            # Choose max value (or random if tied)
+            max_value = max(prediction_d.values())
+            best_keys = [k for k, v in prediction_d.items() if v == max_value]
+            chosen_key = random.choice(best_keys)
 
-                    prediction_d[subject_square_id] = None
-
+            # Temporary - teleport to square instead of moving 1 square at a time
+            new_square = env.square_map.get(chosen_key)
+            if new_square.subject is not None: continue # No more than 1 subject per square
+            square.subject = None
+            new_square.subject = subject
+            print(f"Subject: {subject.id} moved from square {square.id} to {new_square.id}.")
 
 
 

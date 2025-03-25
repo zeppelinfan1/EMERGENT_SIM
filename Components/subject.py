@@ -136,6 +136,8 @@ class Subject:
         self.genetics = Genetics(gene_number=self.gene_number, gene_length=self.gene_length)
         # Network initialization
         self.feature_network = self.initialize_network()
+        # Mapping
+        self.feature_mapping = mapping.Map()
         # Memory
         self.feature_memory = Memory()
 
