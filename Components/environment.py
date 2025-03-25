@@ -259,7 +259,7 @@ class Environment:
 if __name__ == "__main__":
 
     MAX_ITERATIONS = 1
-    NUM_SUBJECTS = 100
+    NUM_SUBJECTS = 1
 
     env = Environment(width=50, height=20)
 
@@ -365,7 +365,31 @@ if __name__ == "__main__":
             # Train
             subject.feature_network.train(X=pairs, y=pair_labels, epochs=1, batch_size=128)
 
+            """SQUARE PREDICTION
+            """
+            prediction_d = {}
+            for subject_square_id, subject_square_value in subject.env_memory.items():
 
+                numerous_features = [1] if len(subject_square_value.features) > 1 else [0]
+                for feature in subject_square_value.features:
+
+                    # Gather embedding
+                    feature_key = f"F:{feature.id}"
+                    feature_embedding = subject.feature_embeddings.get(feature_key)
+                    if feature_embedding is None: # Subject has no experience with it
+                        continue # Need to come up with better methodology later
+
+                    square_input_data = list(feature_embedding) + numerous_features + [0]
+
+                    # Forward pass
+                    output = subject.feature_network.forward(X=np.array(input_data), training=None)
+
+                    # Gather heat map value
+                    pass
+
+
+
+                    prediction_d[subject_square_id] = None
 
 
 
