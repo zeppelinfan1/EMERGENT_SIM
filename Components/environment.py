@@ -367,11 +367,6 @@ if __name__ == "__main__":
             # Train
             subject.feature_network.train(X=pairs, y=pair_labels, epochs=1, batch_size=128)
 
-            # Update mapping
-            for i in range(len(X)):
-
-                subject.feature_mapping.update(X[i], y[i])
-
             """SQUARE PREDICTION
             """
             prediction_d = {}
@@ -391,8 +386,13 @@ if __name__ == "__main__":
                     # Forward pass
                     output = subject.feature_network.forward(X=np.array(square_input_data), training=None)
 
+                    # Update mapping
+                    if subject_square_value.subject is subject:
+                        label = (subject.energy_change + 100) / 200
+                        subject.feature_mapping.update(output, label)
+
                     # Gather heat map value
-                    mapping_pred = subject.feature_mapping.score(feature_embedding)
+                    mapping_pred = subject.feature_mapping.score(output)
 
                     if not subject_square_id in prediction_d.keys():
                         prediction_d[subject_square_id] = mapping_pred

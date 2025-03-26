@@ -2,7 +2,7 @@ import numpy as np
 
 class Map:
 
-    def __init__(self, embedding_dim=3, decay_rate=0.95):
+    def __init__(self, embedding_dim=4, decay_rate=0.95):
 
         self.embedding_dim = embedding_dim
         self.decay_rate = decay_rate
