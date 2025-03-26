@@ -258,7 +258,7 @@ class Environment:
 
 if __name__ == "__main__":
 
-    MAX_ITERATIONS = 1
+    MAX_ITERATIONS = 100
     NUM_SUBJECTS = 10
 
     env = Environment(width=50, height=20)
@@ -287,7 +287,7 @@ if __name__ == "__main__":
         for square in occupied_squares:
 
             subject = square.subject
-            print(f"Subject: {subject.id}")
+            # print(f"Subject: {subject.id}")
             """PERCEIVING ENVIRONMENT
             """
             # Gather perception radius
@@ -379,7 +379,10 @@ if __name__ == "__main__":
                     feature_key = f"F:{feature.id}"
                     feature_embedding = subject.feature_embeddings.get(feature_key)
                     if feature_embedding is None: # Subject has no experience with it
-                        continue # Need to come up with better methodology later
+                        # Generate and assign a new embedding for the unknown feature
+                        feature_key = f"F:{feature.id}"
+                        subject.generate_new_embedding(name=feature_key)
+                        feature_embedding = subject.feature_embeddings[feature_key]
 
                     square_input_data = list(feature_embedding) + numerous_features + [0]
 
@@ -411,7 +414,7 @@ if __name__ == "__main__":
             if new_square.subject is not None: continue # No more than 1 subject per square
             square.subject = None
             new_square.subject = subject
-            print(f"Subject: {subject.id} moved from square {square.id} to {new_square.id}.")
+            # print(f"Subject: {subject.id} moved from square {square.id} to {new_square.id}.")
 
 
 
