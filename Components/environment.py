@@ -281,7 +281,7 @@ if __name__ == "__main__":
             total_energy_change = sum([feature.energy_change for feature in square.features])
             subject.energy_change = total_energy_change
             subject.energy += total_energy_change
-            if total_energy_change > 0:
+            if total_energy_change != 0:
                 print(f"Subject: {subject.id} experienced {total_energy_change} energy change.")
 
         for square in occupied_squares:
