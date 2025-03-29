@@ -218,25 +218,71 @@ class Environment:
 
         return neighbors
 
-    def get_training_data(self, env_memory: dict, feature_memory: dict):
+    def check_numerous_features(self, square):
 
-        input_data = [] # 1 hot for features for each square in environment
-        target_data = [] # Based on feature memory
+        return [1] if len(square.features) > 1 else [0]
 
-        # Loop through squares
-        for square in env_memory.values():
+    def get_training_data(self, subject, current_square):
 
-            # Loop through features
-            for feature in square.features:
+        final_input_data = []
+        final_target_data = []
 
-                # One hot encoding i.e. input data
-                one_hot_feature = [1 if feature.name == mem_name else 0 for mem_name in feature_memory.keys()]
-                input_data.append(one_hot_feature)
-                # Target value from feature memory
-                target_value = feature_memory.get(feature.name)
-                target_data.append(target_value)
+        """MAIN SQUARE i.e. OBSERVED
+        """
+        numerous = self.check_numerous_features(square=current_square)
+        # Loop through features
+        for feature in current_square.features:
 
-        return np.array(input_data), np.array(target_data)
+            feature_key = f"F:{feature.id}"
+            if feature_key not in subject.feature_embeddings:
+                # Create unique embedding and add it to dict
+                subject.generate_new_embedding(name=feature_key)
+
+            # Concat numerous features and 'personal observation' values to list
+            embedding = [float(x) for x in subject.feature_embeddings[feature_key]]
+            input_data = embedding + numerous + [0]  # [0] signifies 'personally observed'
+
+            # Check for observed energy change i.e. target value
+            target_data = [(subject.energy_change + 100) / 200]
+
+            # Append to final
+            final_input_data.append(input_data)
+            final_target_data.append(target_data)
+
+        alternate_subject_squares = [square for square in subject.env_memory.values() if square.subject is not None
+                                     and square.subject is not subject]  # Not the subject itself
+        # Loop through env memory squares
+        for alternate_subject_square in alternate_subject_squares:
+
+            alternate_numerous = self.check_numerous_features(square=alternate_subject_square)
+            # Keep track of the alternate subject
+            alternate_subject = alternate_subject_square.subject
+
+            # Loop through features within alternate square
+            for alternate_feature in alternate_subject_square.features:
+
+                # Ensure feature embedding exists
+                alternate_feature_key = f"F:{alternate_feature.id}"
+                if alternate_feature_key not in subject.feature_embeddings:
+                    # Create unique embedding and add it to dict
+                    subject.generate_new_embedding(name=alternate_feature_key)
+
+                # Gather input/target data
+                alternate_embedding = [float(x) for x in subject.feature_embeddings[alternate_feature_key]]
+                alternate_input_data = alternate_embedding + alternate_numerous + [1]  # [1] signifies perceived
+
+                # Check for observed energy change i.e. target value
+                alternate_target_data = [(alternate_subject.energy_change + 100) / 200]
+
+                # Append
+                final_input_data.append(alternate_input_data)
+                final_target_data.append(alternate_target_data)
+
+        # Add to memory
+        subject.feature_memory.add(embedding=final_input_data, label=final_target_data)
+
+        return final_input_data, final_target_data
+
 
     def check_is_within_bounds(self, x, y): # Needs to be altered to that subject can still move up/down if left/right unavailable
 

@@ -4,7 +4,7 @@ ECOSYSTEM EVOLUTION SIMULATOR
 
 MAX_ITERATIONS = 1
 ENV_HEIGHT = 50
-ENV_WIDTH = 100
+ENV_WIDTH = 20
 SUBJECT_NUM = 10
 SUBJECT_GENE_NUM = 8
 SUBJECT_GENE_LEN = 10
@@ -49,11 +49,17 @@ def main():
             # Update memory
             subject.update_memory(perceivable_env)
 
-            # Check for newly encountered features
-            final_input_data = []
-            final_target_data = []
-            square_features = [feature for feature in square.features]
+            # Gather feature training data
+            input_data, target_values = env.get_training_data(subject, square)
 
+            """ FEATURE NEURAL NETWORK DATA TRAINING
+            """
+            # Gather full training data from memory
+            X, y = subject.feature_memory.get_embeddings()
+            # Constrastive pairs
+            pairs, pair_labels = subject.feature_network.generate_contrastive_pairs(X, y)
+            # Train
+            subject.feature_network.train(X=pairs, y=pair_labels, epochs=1, batch_size=128)
 
 
 
