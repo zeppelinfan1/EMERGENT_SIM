@@ -328,6 +328,10 @@ class Environment:
             if verbage and total_energy_change != 0:
                 print(f"Subject: {subject} experienced {total_energy_change} energy change in square {square}.")
 
+    def predict_square_energy_change(self):
+
+        pass
+
     def display(self):
 
         # Prints the environment, showing 'H' for holes and 'L' for land

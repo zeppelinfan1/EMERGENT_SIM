@@ -1,6 +1,9 @@
-"""
-ECOSYSTEM EVOLUTION SIMULATOR
-"""
+# IMPORTS
+import pandas as pd, numpy as np
+from Components.environment import Environment
+from Components.subject import Subject
+from Components.network import Model
+from Components.db_api import DB_API
 
 MAX_ITERATIONS = 1
 ENV_HEIGHT = 50
@@ -9,15 +12,6 @@ SUBJECT_NUM = 10
 SUBJECT_GENE_NUM = 8
 SUBJECT_GENE_LEN = 10
 SUBJECT_PERCEPTION_RANGE = 3
-
-
-# IMPORTS
-import pandas as pd, numpy as np
-from Components.environment import Environment
-from Components.subject import Subject
-from Components.network import Model
-from Components.db_api import DB_API
-
 
 # MAIN OBJECT
 def main():
@@ -31,6 +25,7 @@ def main():
     """
     for i in range(MAX_ITERATIONS):
 
+        print(f"[~] Iteration #: {i}" + "\n" + "-" * 20)
         """PROCESS ENVIRONMENTAL CHANGES
         """
         env.update_energy_change(verbage=True)
@@ -61,6 +56,9 @@ def main():
             # Train
             subject.feature_network.train(X=pairs, y=pair_labels, epochs=1, batch_size=128)
 
+            """SQUARE PREDICTION
+            """
+            prediction_d = env.predict_square_energy_change()
 
 
 
