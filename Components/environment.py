@@ -70,6 +70,7 @@ class Environment:
 
     width: int
     height: int
+    current_subject_dict: dict = field(default_factory=dict)
     features: Features = field(init=False)
     square_map: dict = field(default_factory=dict)
     movement_map = {
@@ -239,6 +240,17 @@ class Environment:
         square = self.get_random_square_subject()
         # Add subject to square
         square.subject = subject
+
+    def initialize_subjects(self, num_subjects):
+
+        for _ in range(num_subjects):
+
+            new_subject = Subject(gene_number=6, gene_length=10, perception_range=2)
+            new_square = self.get_random_square_subject()
+            # Add to dict
+            self.current_subject_dict[new_subject.id] = new_square.id
+            # Add subject to square
+            new_square.subject = new_subject
 
 
     def display(self):
