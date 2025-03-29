@@ -159,6 +159,14 @@ class Environment:
 
         return None  # Returns None if no square is found
 
+    def get_square_from_subject(self, subject_id):
+
+        return self.current_subject_dict[subject_id]
+
+    def get_subject_from_square(self, square_id):
+
+        pass
+
     def get_squares_in_radius(self, pos, radius):
 
         x, y = pos.x, pos.y
@@ -252,6 +260,27 @@ class Environment:
             # Add subject to square
             new_square.subject = new_subject
 
+    def update_energy_change(self, verbage=False):
+
+        for subject, square in self.current_subject_dict.items():
+
+            real_square = self.square_map.get(square)
+            # Real subject exists within square only
+            real_subject = real_square.subject
+            # Get square features
+            features = real_square.features
+
+            # Total sum of energy change
+            total_energy_change = 0
+            for feature in features:
+
+                total_energy_change += feature.energy_change
+
+            real_subject.energy_change = total_energy_change
+            real_subject.energy += total_energy_change
+
+            if verbage and total_energy_change != 0:
+                print(f"Subject: {subject} experienced {total_energy_change} energy change in square {square}.")
 
     def display(self):
 

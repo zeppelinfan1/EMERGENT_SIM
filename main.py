@@ -33,13 +33,30 @@ def main():
 
         """PROCESS ENVIRONMENTAL CHANGES
         """
-        pass
+        env.update_energy_change(verbage=True)
 
         """LOOP THROUGH CURRENT SUBJECTS
         """
-        for subject, square in env.current_subject_dict.items():
+        for subject_id, square_id in env.current_subject_dict.items():
 
-            print(subject, square)
+            square = env.square_map.get(square_id)
+            subject = square.subject
+
+            """GATHERING ENVIRONMENTAL TRAINING DATA
+            """
+            # Perceiving environment in surrounding radius
+            perceivable_env = env.get_squares_in_radius(square.position, subject.perception_range)
+            # Update memory
+            subject.update_memory(perceivable_env)
+
+            # Check for newly encountered features
+            final_input_data = []
+            final_target_data = []
+            square_features = [feature for feature in square.features]
+
+
+
+
 
 
 
