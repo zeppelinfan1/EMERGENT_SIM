@@ -2,6 +2,7 @@
 import numpy as np
 import random
 from dataclasses import dataclass, field
+from pyspark.sql import SparkSession
 from Components.subject import Subject
 from Components.db_api import DB_API
 
@@ -73,6 +74,7 @@ class Environment:
     current_subject_dict: dict = field(default_factory=dict)
     features: Features = field(init=False)
     square_map: dict = field(default_factory=dict)
+    db: DB_API = field(default_factory=DB_API)
     movement_map = {
         0: (-1, -1), 1: (-1, 0), 2: (-1, 1),
         3: (0, -1), 4: (0, 0), 5: (0, 1),
@@ -84,6 +86,7 @@ class Environment:
         # Initialize features
         self.features = self.initialize_features()
 
+        squares_upload = []
         # Start populating squares from the bottom right
         for y in range(self.height):
 
@@ -98,6 +101,17 @@ class Environment:
                 # Create square
                 new_square = Square(position=pos, features=feature_list)
                 self.square_map[new_square.id] = new_square
+
+                # Append for db upload
+                squares_upload.append({
+                    "id": new_square.id,
+                    "x_coordinate": new_square.position.x,
+                    "y_coordinate": new_square.position.y
+                })
+
+        spark_df = self.db.spark.createDataFrame(squares_upload)
+        # Upload
+        self.db.insert_dataframe(df=spark_df,table_name="squares")
 
     def initialize_features(self):
 

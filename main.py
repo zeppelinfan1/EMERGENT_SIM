@@ -1,8 +1,6 @@
 # IMPORTS
 import pandas as pd, numpy as np
 from Components.environment import Environment
-from Components.subject import Subject
-from Components.network import Model
 from Components.db_api import DB_API
 
 MAX_ITERATIONS = 100
@@ -20,6 +18,8 @@ def main():
     """
     env = Environment(width=ENV_WIDTH, height=ENV_HEIGHT)
     env.initialize_subjects(num_subjects=SUBJECT_NUM)
+    # Database
+    env.db = DB_API()
 
     """MAIN ITERATION LOOP
     """

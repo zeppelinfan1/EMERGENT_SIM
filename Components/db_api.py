@@ -1,6 +1,7 @@
 import mysql.connector
 import json
 import numpy as np, pandas as pd
+from pyspark.sql import SparkSession
 from Components.get_auth import get_auth
 
 
@@ -19,13 +20,37 @@ def db_create(username: str="dchiappo"):
     )
 
     cursor = conn.cursor()
-    print("Connected")
 
     cursor.execute("CREATE DATABASE IF NOT EXISTS sim_db")
 
     cursor.close()
     conn.close()
 
+def features_table_create(username: str="dchiappo", db: str="sim_db"):
+
+    pwd = get_auth(service_name="mysql", username=username)
+
+    conn = mysql.connector.connect(
+        host="localhost",
+        user=username,
+        password=pwd,
+        database=db
+    )
+
+    cursor = conn.cursor()
+
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS features (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        feature_name VARCHAR(25) NOT NULL,
+        feature_type VARCHAR(25) NOT NULL,
+        energy_change INT NOT NULL,
+        create_prob INT NOT NULL
+    );
+    """)
+
+    cursor.close()
+    conn.close()
 
 def squares_table_create(username: str="dchiappo", db: str="sim_db"):
 
@@ -39,19 +64,63 @@ def squares_table_create(username: str="dchiappo", db: str="sim_db"):
     )
 
     cursor = conn.cursor()
-    print("Connected")
 
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS squares (
         id INT AUTO_INCREMENT PRIMARY KEY,
-        x INT NOT NULL,
-        y INT NOT NULL,
-        terrain VARCHAR(50) NOT NULL,
-        objects TEXT
+        x_coordinate INT NOT NULL,
+        y_coordinate INT NOT NULL
     );
     """)
 
-    print("Table 'squares' created successfully.")
+    cursor.close()
+    conn.close()
+
+def subject_table_create(username: str="dchiappo", db: str="sim_db"):
+
+    pwd = get_auth(service_name="mysql", username=username)
+
+    conn = mysql.connector.connect(
+        host="localhost",
+        user=username,
+        password=pwd,
+        database=db
+    )
+
+    cursor = conn.cursor()
+
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS subjects (
+        id INT AUTO_INCREMENT PRIMARY KEY
+    );
+    """)
+
+    cursor.close()
+    conn.close()
+
+def environmental_changes_table_create(username: str="dchiappo", db: str="sim_db"):
+
+    pwd = get_auth(service_name="mysql", username=username)
+
+    conn = mysql.connector.connect(
+        host="localhost",
+        user=username,
+        password=pwd,
+        database=db
+    )
+
+    cursor = conn.cursor()
+
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS environmental_changes (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        iteration INT NOT NULL,
+        subject_id INT NOT NULL,
+        square_id INT NOT NULL,
+        FOREIGN KEY (subject_id) REFERENCES subjects(id),
+        FOREIGN KEY (square_id) REFERENCES squares(id)
+    );
+    """)
 
     cursor.close()
     conn.close()
@@ -68,6 +137,31 @@ class DB_API:
         self.password = get_auth(service_name="mysql", username=username)
         self.conn = None
         self.cursor = None
+
+        # Table creation
+        db_create()
+        features_table_create()
+        subject_table_create()
+        squares_table_create()
+        environmental_changes_table_create()
+
+        # Spark
+        # Initialize SparkSession for JDBC
+        jar_path = r"C:\ProgramData\Microsoft\Windows\Start Menu\Programs\MySQL\mysql-connector-j-9.2.0.jar"
+        self.spark = SparkSession.builder \
+            .appName("EMERGENT_SIM_DB") \
+            .config("spark.jars", jar_path) \
+            .getOrCreate()
+
+        self.spark.sparkContext.setLogLevel("ERROR")
+
+        self.jdbc_url = f"jdbc:mysql://localhost:3306/{self.db}"
+        self.jdbc_options = {
+            "url": self.jdbc_url,
+            "driver": "com.mysql.cj.jdbc.Driver",
+            "user": self.username,
+            "password": self.password,
+        }
 
     def open_conn(self):
 
@@ -89,24 +183,25 @@ class DB_API:
             self.conn.close()
             # print("Database connection closed.")
 
-    def create_hist_table(self, inputs, username: str = "dchiappo", db: str = "sim_db"):
+    def insert_dataframe(self, df, table_name: str, mode: str = "append"):
 
-        self.open_conn()
-        # Delete existing table
-        self.cursor.execute("DROP TABLE IF EXISTS db_hist")
-        # Create based on inputs
-        self.cursor.execute(rf"""
-        CREATE TABLE IF NOT EXISTS db_hist (
-            id INT AUTO_INCREMENT PRIMARY KEY,
-            subject_id INT,
-            square_id INT,
-            {", ".join([f"input_{i} VARCHAR(255) NOT NULL" for i in range(inputs)])},
-            output VARCHAR(255)
-        );
-        """)
+        if not hasattr(self, 'spark') or self.spark is None:
+            raise ValueError("SparkSession is not initialized.")
 
-        print("Table 'squares' created successfully.")
-        self.close_conn()
+        if df.rdd.isEmpty():
+            print(f"[INFO] DataFrame for '{table_name}' is empty. Skipping insert.")
+            return
+
+        try:
+            df.write \
+                .format("jdbc") \
+                .options(**self.jdbc_options, dbtable=table_name) \
+                .mode(mode) \
+                .save()
+            print(f"[SUCCESS] Inserted DataFrame into '{table_name}' with mode='{mode}'.")
+
+        except Exception as e:
+            print(f"[ERROR] Failed to insert into '{table_name}': {e}")
 
     def insert_square(self, x, y, terrain, objects=None):
 
