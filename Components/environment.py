@@ -222,7 +222,7 @@ class Environment:
 
         return [1] if len(square.features) > 1 else [0]
 
-    def get_training_data(self, subject, current_square):
+    def get_training_data(self, subject, current_square, observed_only=False):
 
         final_input_data = []
         final_target_data = []
@@ -248,6 +248,9 @@ class Environment:
             # Append to final
             final_input_data.append(input_data)
             final_target_data.append(target_data)
+
+        # If observed only, then return this, otherwise move on to perceived as well
+        if observed_only: return final_input_data, final_target_data
 
         alternate_subject_squares = [square for square in subject.env_memory.values() if square.subject is not None
                                      and square.subject is not subject]  # Not the subject itself
@@ -328,9 +331,59 @@ class Environment:
             if verbage and total_energy_change != 0:
                 print(f"Subject: {subject} experienced {total_energy_change} energy change in square {square}.")
 
-    def predict_square_energy_change(self):
+    def predict_square_energy_change(self, subject):
 
-        pass
+        prediction_d = {}
+        memory_dict = subject.env_memory
+        # Gather input data
+        for square_id, square_value in memory_dict.items():
+
+            numerous_features = self.check_numerous_features(square_value)
+            for feature in square_value.features:
+
+                # Gather embedding
+                feature_key = f"F:{feature.id}"
+                feature_embedding = subject.feature_embeddings.get(feature_key)
+                if feature_embedding is None:  # Subject has no experience with it
+                    # Generate and assign a new embedding for the unknown feature
+                    feature_key = f"F:{feature.id}"
+                    subject.generate_new_embedding(name=feature_key)
+                    feature_embedding = subject.feature_embeddings[feature_key]
+
+                square_input_data = list(feature_embedding) + numerous_features + [0]
+
+                # Forward pass
+                output = subject.feature_network.forward(X=np.array(square_input_data), training=None)
+
+                # Update mapping
+                if square_value.subject is subject:
+                    label = (subject.energy_change + 100) / 200
+                    subject.feature_mapping.update(output, label)
+
+                # Gather heat map value
+                mapping_pred = subject.feature_mapping.score(output)
+
+                if not square_id in prediction_d.keys():
+                    prediction_d[square_id] = float(mapping_pred)
+                else:
+                    prediction_d[square_id] += float(mapping_pred)
+
+        return prediction_d
+
+    def choose_square(self, prediction_d, env):
+
+        # Sort predictions by score (descending)
+        sorted_choices = sorted(prediction_d.items(), key=lambda x: x[1], reverse=True)
+
+        # Iterate through sorted predictions and pick the first unoccupied square
+        for square_id, _ in sorted_choices:
+
+            square = env.square_map.get(square_id)
+            if square and square.subject is None:
+
+                return square_id  # Best available
+
+        return None  # No available squares
 
     def display(self):
 

@@ -5,7 +5,7 @@ from Components.subject import Subject
 from Components.network import Model
 from Components.db_api import DB_API
 
-MAX_ITERATIONS = 1
+MAX_ITERATIONS = 100
 ENV_HEIGHT = 50
 ENV_WIDTH = 20
 SUBJECT_NUM = 10
@@ -30,7 +30,7 @@ def main():
         """
         env.update_energy_change(verbage=True)
 
-        """LOOP THROUGH CURRENT SUBJECTS
+        """LOOP THROUGH CURRENT SUBJECTS - SUBJECT DECISION MAKING PROCESS
         """
         for subject_id, square_id in env.current_subject_dict.items():
 
@@ -58,7 +58,17 @@ def main():
 
             """SQUARE PREDICTION
             """
-            prediction_d = env.predict_square_energy_change()
+            prediction_d = env.predict_square_energy_change(subject)
+            chosen_id = env.choose_square(prediction_d, env)
+            if chosen_id is None: continue  # Skip turn if no unoccupied squares available
+
+            # Process new square movement
+            new_square = env.square_map[chosen_id]
+            square.subject = None
+            new_square.subject = subject
+            env.current_subject_dict[subject.id] = chosen_id
+            # print(f"Subject: {subject.id} moved from square {square.id} to {new_square.id}.")
+
 
 
 
