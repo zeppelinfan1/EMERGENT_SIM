@@ -45,7 +45,7 @@ def main():
             subject.update_memory(perceivable_env)
 
             # Gather feature training data
-            input_data, target_values = env.get_training_data(subject, square)
+            env.get_training_data(subject, square)
 
             """ FEATURE NEURAL NETWORK DATA TRAINING
             """

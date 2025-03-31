@@ -284,9 +284,6 @@ class Environment:
         # Add to memory
         subject.feature_memory.add(embedding=final_input_data, label=final_target_data)
 
-        return final_input_data, final_target_data
-
-
     def check_is_within_bounds(self, x, y): # Needs to be altered to that subject can still move up/down if left/right unavailable
 
         # Check if (x, y) is within the grid boundaries.
