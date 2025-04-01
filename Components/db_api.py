@@ -132,13 +132,15 @@ def environmental_changes_table_create(username: str="dchiappo", db: str="sim_db
 
 class DB_API:
 
-    def __init__(self, username: str="dchiappo", db: str="sim_db"):
+    def __init__(self, username: str="dchiappo", db: str="sim_db", reset=True):
 
         self.username = username
         self.db = db
         self.password = get_auth(service_name="mysql", username=username)
         self.conn = None
         self.cursor = None
+
+        if reset: self.reset_tables()
 
         # Table creation
         db_create()
@@ -163,6 +165,22 @@ class DB_API:
             "user": self.username,
             "password": self.password,
         }
+
+    def reset_tables(self):
+
+        conn = mysql.connector.connect(
+            host="localhost",
+            user=self.username,
+            password=self.password,
+            database=self.db
+        )
+        cursor = conn.cursor()
+        tables = ["environmental_changes", "squares", "subjects", "features"]
+        for table in tables:
+            cursor.execute(f"DROP TABLE IF EXISTS {table};")
+        conn.commit()
+        cursor.close()
+        conn.close()
 
     def open_conn(self):
 

@@ -311,6 +311,7 @@ class Environment:
 
     def initialize_subjects(self, num_subjects):
 
+        subject_list = []
         for _ in range(num_subjects):
 
             new_subject = Subject(gene_number=6, gene_length=10, perception_range=2)
@@ -319,6 +320,10 @@ class Environment:
             self.current_subject_dict[new_subject.id] = new_square.id
             # Add subject to square
             new_square.subject = new_subject
+            subject_list.append(new_subject.id)
+
+        spark_df = self.db.spark.createDataFrame(subject_list)
+        self.db.insert_dataframe(df=spark_df, table_name="subjects")
 
     def update_energy_change(self, verbage=False):
 

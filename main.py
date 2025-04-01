@@ -17,8 +17,6 @@ def main():
     """
     env = Environment(width=ENV_WIDTH, height=ENV_HEIGHT)
     env.initialize_subjects(num_subjects=SUBJECT_NUM)
-    # Database
-    env.db = DB_API()
 
     """MAIN ITERATION LOOP
     """
