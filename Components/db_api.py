@@ -1,5 +1,7 @@
 import mysql.connector
-import json
+import os, json
+os.environ['PYSPARK_PYTHON'] = r'D:\Python\python.exe'
+os.environ['PYSPARK_DRIVER_PYTHON'] = r'D:\Python\python.exe'
 import numpy as np, pandas as pd
 from pyspark.sql import SparkSession
 from Components.get_auth import get_auth
@@ -145,7 +147,6 @@ class DB_API:
         squares_table_create()
         environmental_changes_table_create()
 
-        # Spark
         # Initialize SparkSession for JDBC
         jar_path = r"C:\ProgramData\Microsoft\Windows\Start Menu\Programs\MySQL\mysql-connector-j-9.2.0.jar"
         self.spark = SparkSession.builder \

@@ -1,6 +1,4 @@
 import numpy as np
-import matplotlib.pyplot as plt
-import os, cv2, urllib, urllib.request, zipfile
 from Components.mapping import Map
 
 

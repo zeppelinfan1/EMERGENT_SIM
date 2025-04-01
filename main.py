@@ -1,5 +1,4 @@
 # IMPORTS
-import pandas as pd, numpy as np
 from Components.environment import Environment
 from Components.db_api import DB_API
 
