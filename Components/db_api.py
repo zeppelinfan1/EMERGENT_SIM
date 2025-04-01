@@ -93,7 +93,7 @@ def subject_table_create(username: str="dchiappo", db: str="sim_db"):
 
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS subjects (
-        id INT AUTO_INCREMENT PRIMARY KEY
+        id INT NOT NULL PRIMARY KEY
     );
     """)
 
@@ -119,6 +119,7 @@ def environmental_changes_table_create(username: str="dchiappo", db: str="sim_db
         iteration INT NOT NULL,
         subject_id INT NOT NULL,
         square_id INT NOT NULL,
+        energy_change INT NOT NULL,
         FOREIGN KEY (subject_id) REFERENCES subjects(id),
         FOREIGN KEY (square_id) REFERENCES squares(id)
     );

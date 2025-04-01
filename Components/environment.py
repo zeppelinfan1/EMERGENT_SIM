@@ -320,13 +320,14 @@ class Environment:
             self.current_subject_dict[new_subject.id] = new_square.id
             # Add subject to square
             new_square.subject = new_subject
-            subject_list.append(new_subject.id)
+            subject_list.append({"id": new_subject.id})
 
         spark_df = self.db.spark.createDataFrame(subject_list)
         self.db.insert_dataframe(df=spark_df, table_name="subjects")
 
-    def update_energy_change(self, verbage=False):
+    def update_energy_change(self, iteration, verbage=False):
 
+        change_list = []
         for subject, square in self.current_subject_dict.items():
 
             real_square = self.square_map.get(square)
@@ -341,11 +342,22 @@ class Environment:
 
                 total_energy_change += feature.energy_change
 
+                if total_energy_change != 0: # Add feature to this later
+                    change_list.append({
+                        "iteration": iteration,
+                        "subject_id": real_subject.id,
+                        "square_id": real_square.id,
+                        "energy_change": feature.energy_change
+                    })
+                    if verbage:
+                        print(f"Subject: {subject} experienced {total_energy_change} energy change in square {square}.")
+
             real_subject.energy_change = total_energy_change
             real_subject.energy += total_energy_change
 
-            if verbage and total_energy_change != 0:
-                print(f"Subject: {subject} experienced {total_energy_change} energy change in square {square}.")
+        if len(change_list) > 0:
+            spark_df = self.db.spark.createDataFrame(change_list)
+            self.db.insert_dataframe(spark_df, table_name="environmental_changes")
 
     def predict_square_energy_change(self, subject):
 

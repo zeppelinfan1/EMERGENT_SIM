@@ -25,7 +25,7 @@ def main():
         print(f"[~] Iteration #: {i}" + "\n" + "-" * 20)
         """PROCESS ENVIRONMENTAL CHANGES
         """
-        env.update_energy_change(verbage=True)
+        env.update_energy_change(i, verbage=True)
 
         """LOOP THROUGH CURRENT SUBJECTS - SUBJECT DECISION MAKING PROCESS
         """
