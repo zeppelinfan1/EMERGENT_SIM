@@ -133,7 +133,7 @@ def environmental_changes_table_create(username: str="dchiappo", db: str="sim_db
 
 class DB_API:
 
-    def __init__(self, username: str="dchiappo", db: str="sim_db", reset=True):
+    def __init__(self, username: str="dchiappo", db: str="sim_db", spark=False, reset=True):
 
         self.username = username
         self.db = db
@@ -151,21 +151,22 @@ class DB_API:
         environmental_changes_table_create()
 
         # Initialize SparkSession for JDBC
-        jar_path = r"C:\ProgramData\Microsoft\Windows\Start Menu\Programs\MySQL\mysql-connector-j-9.2.0.jar"
-        self.spark = SparkSession.builder \
-            .appName("EMERGENT_SIM_DB") \
-            .config("spark.jars", jar_path) \
-            .getOrCreate()
+        if spark:
+            jar_path = r"C:\ProgramData\Microsoft\Windows\Start Menu\Programs\MySQL\mysql-connector-j-9.2.0.jar"
+            self.spark = SparkSession.builder \
+                .appName("EMERGENT_SIM_DB") \
+                .config("spark.jars", jar_path) \
+                .getOrCreate()
 
-        self.spark.sparkContext.setLogLevel("ERROR")
+            self.spark.sparkContext.setLogLevel("ERROR")
 
-        self.jdbc_url = f"jdbc:mysql://localhost:3306/{self.db}"
-        self.jdbc_options = {
-            "url": self.jdbc_url,
-            "driver": "com.mysql.cj.jdbc.Driver",
-            "user": self.username,
-            "password": self.password,
-        }
+            self.jdbc_url = f"jdbc:mysql://localhost:3306/{self.db}"
+            self.jdbc_options = {
+                "url": self.jdbc_url,
+                "driver": "com.mysql.cj.jdbc.Driver",
+                "user": self.username,
+                "password": self.password,
+            }
 
     def reset_tables(self):
 
@@ -203,7 +204,29 @@ class DB_API:
             self.conn.close()
             # print("Database connection closed.")
 
-    def insert_dataframe(self, df, table_name: str, mode: str = "append"):
+    def insert_mysql_bulk(self, table_name: str, data: list[dict]):
+
+        if not data:
+            print(f"[INFO] No data to insert into '{table_name}'. Skipping.")
+            return
+
+        # Extract column names from the first dictionary
+        columns = data[0].keys()
+        placeholders = ", ".join(["%s"] * len(columns))
+        column_str = ", ".join(columns)
+        insert_query = f"INSERT INTO {table_name} ({column_str}) VALUES ({placeholders})"
+
+        values = [tuple(row[col] for col in columns) for row in data]
+
+        try:
+            self.open_conn()
+            self.cursor.executemany(insert_query, values)
+        except Exception as e:
+            print(f"[ERROR] MySQL insert failed for '{table_name}': {e}")
+        finally:
+            self.close_conn()
+
+    def insert_dataframe_spark(self, df, table_name: str, mode: str = "append"):
 
         if not hasattr(self, 'spark') or self.spark is None:
             raise ValueError("SparkSession is not initialized.")

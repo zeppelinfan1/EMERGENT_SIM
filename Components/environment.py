@@ -109,9 +109,10 @@ class Environment:
                     "y_coordinate": new_square.position.y
                 })
 
-        spark_df = self.db.spark.createDataFrame(squares_upload)
         # Upload
-        self.db.insert_dataframe(df=spark_df,table_name="squares")
+        # spark_df = self.db.spark.createDataFrame(squares_upload)
+        # self.db.insert_dataframe_spark(df=spark_df,table_name="squares")
+        self.db.insert_mysql_bulk(table_name="squares", data=squares_upload)
 
     def initialize_features(self):
 
@@ -322,8 +323,10 @@ class Environment:
             new_square.subject = new_subject
             subject_list.append({"id": new_subject.id})
 
-        spark_df = self.db.spark.createDataFrame(subject_list)
-        self.db.insert_dataframe(df=spark_df, table_name="subjects")
+        # Upload
+        # spark_df = self.db.spark.createDataFrame(subject_list)
+        # self.db.insert_dataframe_spark(df=spark_df, table_name="subjects")
+        self.db.insert_mysql_bulk(table_name="subjects", data=subject_list)
 
     def update_energy_change(self, iteration, verbage=False):
 
@@ -356,8 +359,9 @@ class Environment:
             real_subject.energy += total_energy_change
 
         if len(change_list) > 0:
-            spark_df = self.db.spark.createDataFrame(change_list)
-            self.db.insert_dataframe(spark_df, table_name="environmental_changes")
+            # spark_df = self.db.spark.createDataFrame(change_list)
+            # self.db.insert_dataframe_spark(spark_df, table_name="environmental_changes")
+            self.db.insert_mysql_bulk(table_name="environmental_changes", data=change_list)
 
     def predict_square_energy_change(self, subject):
 
