@@ -29,10 +29,18 @@ def main():
 
         """LOOP THROUGH CURRENT SUBJECTS - SUBJECT DECISION MAKING PROCESS
         """
+        current_positions = []
         for subject_id, square_id in env.current_subject_dict.items():
 
             square = env.square_map.get(square_id)
             subject = square.subject
+            current_positions.append({
+                "iteration": i,
+                "subject_id": subject_id,
+                "square_id": square_id,
+                "square_x": square.position.x,
+                "square_y": square.position.y
+            })
 
             """GATHERING ENVIRONMENTAL TRAINING DATA
             """
@@ -66,6 +74,8 @@ def main():
             env.current_subject_dict[subject.id] = chosen_id
             # print(f"Subject: {subject.id} moved from square {square.id} to {new_square.id}.")
 
+        # Update database
+        env.db.insert_mysql_bulk(table_name="current_positions", data=current_positions)
 
 
 

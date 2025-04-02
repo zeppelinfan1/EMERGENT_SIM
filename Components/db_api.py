@@ -100,6 +100,35 @@ def subject_table_create(username: str="dchiappo", db: str="sim_db"):
     cursor.close()
     conn.close()
 
+def current_positions_table_create(username: str="dchiappo", db: str="sim_db"):
+
+    pwd = get_auth(service_name="mysql", username=username)
+
+    conn = mysql.connector.connect(
+        host="localhost",
+        user=username,
+        password=pwd,
+        database=db
+    )
+
+    cursor = conn.cursor()
+
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS current_positions (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        iteration INT NOT NULL,
+        subject_id INT NOT NULL,
+        square_id INT NOT NULL,
+        square_x INT NOT NULL,
+        square_y INT NOT NULL,
+        FOREIGN KEY (subject_id) REFERENCES subjects(id),
+        FOREIGN KEY (square_id) REFERENCES squares(id)
+    );
+    """)
+
+    cursor.close()
+    conn.close()
+
 def environmental_changes_table_create(username: str="dchiappo", db: str="sim_db"):
 
     pwd = get_auth(service_name="mysql", username=username)
@@ -149,6 +178,7 @@ class DB_API:
         subject_table_create()
         squares_table_create()
         environmental_changes_table_create()
+        current_positions_table_create()
 
         # Initialize SparkSession for JDBC
         if spark:
@@ -177,7 +207,7 @@ class DB_API:
             database=self.db
         )
         cursor = conn.cursor()
-        tables = ["environmental_changes", "squares", "subjects", "features"]
+        tables = ["current_positions", "environmental_changes", "squares", "subjects", "features"]
         for table in tables:
             cursor.execute(f"DROP TABLE IF EXISTS {table};")
         conn.commit()
@@ -221,6 +251,7 @@ class DB_API:
         try:
             self.open_conn()
             self.cursor.executemany(insert_query, values)
+            self.conn.commit()
         except Exception as e:
             print(f"[ERROR] MySQL insert failed for '{table_name}': {e}")
         finally:
