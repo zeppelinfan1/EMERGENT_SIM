@@ -119,18 +119,32 @@ class Environment:
         # Gathering created features
         features = Features()
         feature_dict = features.feature
-        for var_name, var_value in globals().items():
 
-            # If the value is a Feature object
-            if isinstance(var_value, Feature):
+        """TEMPORARY - EVENTUALLY WILL GENERATE THESE EMERGENTLY
+        """
 
-                # Already added to dictionary?
-                if var_value.type not in feature_dict.keys():
-                    # Create entry in value (list)
-                    feature_dict[var_value.type] = []
-                    feature_dict[var_value.type].append(var_value)
-                else:
-                    feature_dict[var_value.type].append(var_value)
+        features_db_list = []
+        for feat in [Feature(name="LAND", type="TERRAIN", energy_change=0, probability=1),
+                     Feature(name="HOLE", type="TERRAIN", energy_change=-100, probability=0.05)]:
+
+            # Already added to dictionary?
+            if feat.type not in feature_dict.keys():
+                # Create entry in value (list)
+                feature_dict[feat.type] = []
+                feature_dict[feat.type].append(feat)
+            else:
+                feature_dict[feat.type].append(feat)
+
+            # Append for db bulk update
+            features_db_list.append({
+                "feature_name": feat.name,
+                "feature_type": feat.type,
+                "energy_change": feat.energy_change,
+                "create_prob": feat.probability
+            })
+
+        # Upload to db
+        self.db.insert_mysql_bulk(table_name="features", data=features_db_list)
 
         # Loop through keys
         for feature_type in feature_dict.keys():
