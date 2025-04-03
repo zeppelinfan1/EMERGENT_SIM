@@ -25,10 +25,6 @@ class Feature:
         Feature.last_id += 1
         self.id = Feature.last_id
 
-# Types of terrains
-LAND = Feature(name="LAND", type="TERRAIN", energy_change=0, probability=1)
-HOLE = Feature(name="HOLE", type="TERRAIN", energy_change=-100, probability=0.05)
-
 @dataclass
 class Features:
 
@@ -87,6 +83,7 @@ class Environment:
         self.features = self.initialize_features()
 
         squares_upload = []
+        square_features_upload = []
         # Start populating squares from the bottom right
         for y in range(self.height):
 
@@ -109,10 +106,18 @@ class Environment:
                     "y_coordinate": new_square.position.y
                 })
 
+                for square_feature in new_square.features:
+
+                    square_features_upload.append({
+                        "square_id": new_square.id,
+                        "feature_id": square_feature.id
+                    })
+
         # Upload
         # spark_df = self.db.spark.createDataFrame(squares_upload)
         # self.db.insert_dataframe_spark(df=spark_df,table_name="squares")
         self.db.insert_mysql_bulk(table_name="squares", data=squares_upload)
+        self.db.insert_mysql_bulk(table_name="square_features", data=square_features_upload)
 
     def initialize_features(self):
 

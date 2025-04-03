@@ -46,10 +46,9 @@ def main():
             """
             # Perceiving environment in surrounding radius
             perceivable_env = env.get_squares_in_radius(square.position, subject.perception_range)
-            # Update memory
+            # Update environmental
             subject.update_memory(perceivable_env)
-
-            # Gather feature training data
+            # Update subject feature memory (training data)
             env.get_training_data(subject, square)
 
             """ FEATURE NEURAL NETWORK DATA TRAINING
