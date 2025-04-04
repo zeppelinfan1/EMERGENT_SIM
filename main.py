@@ -30,6 +30,7 @@ def main():
         """LOOP THROUGH CURRENT SUBJECTS - SUBJECT DECISION MAKING PROCESS
         """
         current_positions = []
+        subject_environmental_memory = []
         for subject_id, square_id in env.current_subject_dict.items():
 
             square = env.square_map.get(square_id)
@@ -46,8 +47,17 @@ def main():
             """
             # Perceiving environment in surrounding radius
             perceivable_env = env.get_squares_in_radius(square.position, subject.perception_range)
+
             # Update environmental
             subject.update_memory(perceivable_env)
+            for key, value in subject.env_memory.items(): # Logging
+
+                subject_environmental_memory.append({
+                    "iteration": i,
+                    "subject_id": subject_id,
+                    "square_id": value.id
+                })
+
             # Update subject feature memory (training data)
             env.get_training_data(subject, square)
 
@@ -75,6 +85,7 @@ def main():
 
         # Update database
         env.db.insert_mysql_bulk(table_name="current_positions", data=current_positions)
+        env.db.insert_mysql_bulk(table_name="environmental_memory", data=subject_environmental_memory)
 
 
 
