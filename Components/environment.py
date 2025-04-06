@@ -256,11 +256,11 @@ class Environment:
 
         return [1] if len(square.features) > 1 else [0]
 
-    def get_training_data(self, subject, current_square, observed_only=False):
+    def get_training_data(self, i, subject, current_square, observed_only=False):
 
         final_input_data = []
         final_target_data = []
-
+        feature_memory = []
         """MAIN SQUARE i.e. OBSERVED
         """
         numerous = self.check_numerous_features(square=current_square)
@@ -282,6 +282,16 @@ class Environment:
             # Append to final
             final_input_data.append(input_data)
             final_target_data.append(target_data)
+
+            feature_memory.append({
+                "iteration": i,
+                "subject_id": subject.id,
+                "target_subject_id": subject.id,
+                "square_id": current_square.id,
+                "feature_id": feature.id,
+                "feature_embedding": ",".join(map(str, embedding)),
+                "feature_label": float(target_data[0])
+            })
 
         # If observed only, then return this, otherwise move on to perceived as well
         if observed_only: return final_input_data, final_target_data
@@ -315,8 +325,20 @@ class Environment:
                 final_input_data.append(alternate_input_data)
                 final_target_data.append(alternate_target_data)
 
+                feature_memory.append({
+                    "iteration": i,
+                    "subject_id": subject.id,
+                    "target_subject_id": alternate_subject.id,
+                    "square_id": alternate_subject_square.id,
+                    "feature_id": alternate_feature.id,
+                    "feature_embedding": ",".join(map(str, alternate_embedding)),
+                    "feature_label": float(alternate_target_data[0])
+                })
+
         # Add to memory
         subject.feature_memory.add(embedding=final_input_data, label=final_target_data)
+        # Update db
+        self.db.insert_mysql_bulk(table_name="feature_memory", data=feature_memory)
 
     def check_is_within_bounds(self, x, y): # Needs to be altered to that subject can still move up/down if left/right unavailable
 

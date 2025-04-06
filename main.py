@@ -59,7 +59,7 @@ def main():
                 })
 
             # Update subject feature memory (training data)
-            env.get_training_data(subject, square)
+            env.get_training_data(i, subject, square)
 
             """ FEATURE NEURAL NETWORK DATA TRAINING
             """

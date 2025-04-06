@@ -210,6 +210,38 @@ def environmental_memory_table_create(username: str="dchiappo", db: str="sim_db"
     cursor.close()
     conn.close()
 
+def feature_memory_table_create(username: str="dchiappo", db: str="sim_db"):
+
+    pwd = get_auth(service_name="mysql", username=username)
+
+    conn = mysql.connector.connect(
+        host="localhost",
+        user=username,
+        password=pwd,
+        database=db
+    )
+
+    cursor = conn.cursor()
+
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS feature_memory (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        iteration INT NOT NULL,
+        subject_id INT NOT NULL,
+        target_subject_id INT NOT NULL,
+        square_id INT NOT NULL,
+        feature_id INT NOT NULL,
+        feature_embedding TEXT NOT NULL,
+        feature_label DOUBLE NOT NULL,
+        FOREIGN KEY (subject_id) REFERENCES subjects(id),
+        FOREIGN KEY (square_id) REFERENCES squares(id),
+        FOREIGN KEY (feature_id) REFERENCES features(id)
+    );
+    """)
+
+    cursor.close()
+    conn.close()
+
 """OBJECTS
 """
 
@@ -234,6 +266,7 @@ class DB_API:
         current_positions_table_create()
         square_features_create()
         environmental_memory_table_create()
+        feature_memory_table_create()
 
         # Initialize SparkSession for JDBC
         if spark:
@@ -262,7 +295,8 @@ class DB_API:
             database=self.db
         )
         cursor = conn.cursor()
-        tables = ["environmental_memory", "current_positions", "environmental_changes", "square_features", "squares", "subjects", "features"]
+        tables = ["feature_memory", "environmental_memory", "current_positions",
+                  "environmental_changes", "square_features", "squares", "subjects", "features"]
         for table in tables:
             cursor.execute(f"DROP TABLE IF EXISTS {table};")
         conn.commit()
