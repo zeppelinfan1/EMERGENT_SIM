@@ -404,9 +404,10 @@ class Environment:
             # self.db.insert_dataframe_spark(spark_df, table_name="environmental_changes")
             self.db.insert_mysql_bulk(table_name="environmental_changes", data=change_list)
 
-    def predict_square_energy_change(self, subject):
+    def predict_square_energy_change(self, i, subject):
 
         prediction_d = {}
+        prediction_list = []
         memory_dict = subject.env_memory
         # Gather input data
         for square_id, square_value in memory_dict.items():
@@ -440,6 +441,16 @@ class Environment:
                     prediction_d[square_id] = float(mapping_pred)
                 else:
                     prediction_d[square_id] += float(mapping_pred)
+
+            prediction_list.append({
+                "iteration": i,
+                "subject_id": subject.id,
+                "square_id": square_id,
+                "prediction": prediction_d.get(square_id)
+            })
+
+        # Update db
+        self.db.insert_mysql_bulk(table_name="square_prediction", data=prediction_list)
 
         return prediction_d
 

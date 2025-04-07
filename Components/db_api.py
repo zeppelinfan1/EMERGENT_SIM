@@ -242,6 +242,34 @@ def feature_memory_table_create(username: str="dchiappo", db: str="sim_db"):
     cursor.close()
     conn.close()
 
+def square_prediction_table_create(username: str="dchiappo", db: str="sim_db"):
+
+    pwd = get_auth(service_name="mysql", username=username)
+
+    conn = mysql.connector.connect(
+        host="localhost",
+        user=username,
+        password=pwd,
+        database=db
+    )
+
+    cursor = conn.cursor()
+
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS square_prediction (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        iteration INT NOT NULL,
+        subject_id INT NOT NULL,
+        square_id INT NOT NULL,
+        prediction DOUBLE NOT NULL,
+        FOREIGN KEY (subject_id) REFERENCES subjects(id),
+        FOREIGN KEY (square_id) REFERENCES squares(id)
+    );
+    """)
+
+    cursor.close()
+    conn.close()
+
 """OBJECTS
 """
 
@@ -267,6 +295,7 @@ class DB_API:
         square_features_create()
         environmental_memory_table_create()
         feature_memory_table_create()
+        square_prediction_table_create()
 
         # Initialize SparkSession for JDBC
         if spark:
@@ -295,7 +324,7 @@ class DB_API:
             database=self.db
         )
         cursor = conn.cursor()
-        tables = ["feature_memory", "environmental_memory", "current_positions",
+        tables = ["square_prediction", "feature_memory", "environmental_memory", "current_positions",
                   "environmental_changes", "square_features", "squares", "subjects", "features"]
         for table in tables:
             cursor.execute(f"DROP TABLE IF EXISTS {table};")
