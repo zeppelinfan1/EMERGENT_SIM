@@ -408,6 +408,7 @@ class Environment:
 
         prediction_d = {}
         prediction_list = []
+        mapping_list = []
         memory_dict = subject.env_memory
         # Gather input data
         for square_id, square_value in memory_dict.items():
@@ -434,6 +435,15 @@ class Environment:
                     label = (subject.energy_change + 100) / 200
                     subject.feature_mapping.update(output, label)
 
+                    for val, embed in subject.feature_mapping.centroids.items():
+
+                        mapping_list.append({
+                            "iteration": i,
+                            "subject_id": subject.id,
+                            "label": val,
+                            "embedding": ",".join(map(str, embed))
+                        })
+
                 # Gather heat map value
                 mapping_pred = subject.feature_mapping.score(output)
 
@@ -451,6 +461,7 @@ class Environment:
 
         # Update db
         self.db.insert_mysql_bulk(table_name="square_prediction", data=prediction_list)
+        self.db.insert_mysql_bulk(table_name="feature_mapping", data=mapping_list)
 
         return prediction_d
 
