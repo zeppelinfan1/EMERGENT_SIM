@@ -173,8 +173,14 @@ class Subject:
 
     def update_memory(self, env_section):
 
-        # Loop through each square and replace with current
-        self.env_memory.update(env_section)
+        new_keys = 0
+        # Loop through squares and ensure that it is updated in the subjects enviromental memory
+        for square_id, square_data in env_section.items():
+
+            if square_id not in self.env_memory:
+                self.env_memory[square_id] = square_data
+                new_keys += 1
+            else: self.env_memory[square_id] = square_data
 
 if __name__ == "__main__":
 
