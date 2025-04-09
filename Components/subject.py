@@ -171,7 +171,7 @@ class Subject:
 
         return network
 
-    def update_memory(self, env_section):
+    def update_memory(self, env_section, verbage=False):
 
         new_keys = 0
         # Loop through squares and ensure that it is updated in the subjects enviromental memory
@@ -181,6 +181,8 @@ class Subject:
                 self.env_memory[square_id] = square_data
                 new_keys += 1
             else: self.env_memory[square_id] = square_data
+
+        if new_keys > 0 and verbage: print(f"{new_keys} new keys added.")
 
 if __name__ == "__main__":
 

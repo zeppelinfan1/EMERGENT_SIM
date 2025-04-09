@@ -467,18 +467,23 @@ class Environment:
 
     def choose_square(self, prediction_d, env):
 
-        # Sort predictions by score (descending)
-        sorted_choices = sorted(prediction_d.items(), key=lambda x: x[1], reverse=True)
+        # Filter to only unoccupied squares
+        available = {
+            sid: score for sid, score in prediction_d.items()
+            if env.square_map.get(sid) and env.square_map[sid].subject is None
+        }
 
-        # Iterate through sorted predictions and pick the first unoccupied square
-        for square_id, _ in sorted_choices:
+        if not available:
+            return None
 
-            square = env.square_map.get(square_id)
-            if square and square.subject is None:
+        # Normalize scores for sampling
+        total = sum(available.values())
+        if total == 0:
+            return random.choice(list(available.keys()))
 
-                return square_id  # Best available
+        probabilities = [score / total for score in available.values()]
 
-        return None  # No available squares
+        return random.choices(list(available.keys()), weights=probabilities, k=1)[0]
 
     def display(self):
 

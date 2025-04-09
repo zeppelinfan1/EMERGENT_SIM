@@ -5,7 +5,7 @@ from Components.db_api import DB_API
 MAX_ITERATIONS = 100
 ENV_HEIGHT = 50
 ENV_WIDTH = 20
-SUBJECT_NUM = 10
+SUBJECT_NUM = 1
 SUBJECT_GENE_NUM = 8
 SUBJECT_GENE_LEN = 10
 SUBJECT_PERCEPTION_RANGE = 3
@@ -49,7 +49,7 @@ def main():
             perceivable_env = env.get_squares_in_radius(square.position, subject.perception_range)
 
             # Update environmental
-            subject.update_memory(perceivable_env)
+            subject.update_memory(perceivable_env, verbage=False)
             for key, value in subject.env_memory.items(): # Logging
 
                 subject_environmental_memory.append({
