@@ -476,14 +476,15 @@ class Environment:
         if not available:
             return None
 
-        # Normalize scores for sampling
-        total = sum(available.values())
-        if total == 0:
-            return random.choice(list(available.keys()))
+        # Convert scores to a NumPy array for softmax
+        scores = np.array(list(available.values()))
 
-        probabilities = [score / total for score in available.values()]
+        # Apply softmax transformation
+        exp_scores = np.exp(scores - np.max(scores))  # stability fix
+        probabilities = exp_scores / np.sum(exp_scores)
 
-        return random.choices(list(available.keys()), weights=probabilities, k=1)[0]
+        # Randomly choose a square based on softmax-weighted probabilities
+        return np.random.choice(list(available.keys()), p=probabilities)
 
     def display(self):
 

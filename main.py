@@ -5,7 +5,7 @@ from Components.db_api import DB_API
 MAX_ITERATIONS = 100
 ENV_HEIGHT = 50
 ENV_WIDTH = 20
-SUBJECT_NUM = 1
+SUBJECT_NUM = 10
 SUBJECT_GENE_NUM = 8
 SUBJECT_GENE_LEN = 10
 SUBJECT_PERCEPTION_RANGE = 3
@@ -73,7 +73,7 @@ def main():
             """SQUARE PREDICTION
             """
             prediction_d = env.predict_square_energy_change(i, subject)
-            chosen_id = env.choose_square(prediction_d, env)
+            chosen_id = int(env.choose_square(prediction_d, env))
             if chosen_id is None: continue  # Skip turn if no unoccupied squares available
 
             # Process new square movement
