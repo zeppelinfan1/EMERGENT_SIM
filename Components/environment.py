@@ -465,7 +465,7 @@ class Environment:
 
         return prediction_d
 
-    def choose_square(self, prediction_d, env):
+    def choose_square(self, prediction_d, env, scale=2.0):
 
         # Filter to only unoccupied squares
         available = {
@@ -483,8 +483,8 @@ class Environment:
         mean_score = np.mean(scores)
         transformed_scores = np.where(
             scores >= mean_score,
-            np.exp(scores - mean_score),  # Amplify scores above the mean
-            np.exp(-(mean_score - scores))  # Suppress scores below the mean
+            np.exp(scale * (scores - mean_score)),  # Amplify scores above the mean
+            np.exp(-scale * (mean_score - scores))  # Suppress scores below the mean
         )
 
         # Normalize to probabilities
