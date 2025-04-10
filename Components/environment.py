@@ -473,18 +473,25 @@ class Environment:
             if env.square_map.get(sid) and env.square_map[sid].subject is None
         }
 
-        if not available:
-            return None
+        if not available: return None
 
-        # Convert scores to a NumPy array for softmax
+        # Convert to NumPy arrays
+        square_ids = np.array(list(available.keys()))
         scores = np.array(list(available.values()))
 
-        # Apply softmax transformation
-        exp_scores = np.exp(scores - np.max(scores))  # stability fix
-        probabilities = exp_scores / np.sum(exp_scores)
+        # Two-sided exponential scaling
+        mean_score = np.mean(scores)
+        transformed_scores = np.where(
+            scores >= mean_score,
+            np.exp(scores - mean_score),  # Amplify scores above the mean
+            np.exp(-(mean_score - scores))  # Suppress scores below the mean
+        )
 
-        # Randomly choose a square based on softmax-weighted probabilities
-        return np.random.choice(list(available.keys()), p=probabilities)
+        # Normalize to probabilities
+        probabilities = transformed_scores / np.sum(transformed_scores)
+
+        # Choose one square based on transformed probabilities
+        return np.random.choice(square_ids, p=probabilities)
 
     def display(self):
 
