@@ -478,17 +478,19 @@ class Environment:
         # Convert to NumPy arrays
         square_ids = np.array(list(available.keys()))
         scores = np.array(list(available.values()))
+        min_score = np.min(scores)
+        max_score = np.max(scores)
 
-        # Two-sided exponential scaling
-        mean_score = np.mean(scores)
-        transformed_scores = np.where(
-            scores >= mean_score,
-            np.exp(scale * (scores - mean_score)),  # Amplify scores above the mean
-            np.exp(-scale * (mean_score - scores))  # Suppress scores below the mean
-        )
+        # Avoid division by zero if all scores are the same
+        if max_score == min_score:
+            probabilities = np.ones_like(scores) / len(scores)
+        else:
+            # Min-max normalization to range [0, 1]
+            norm_scores = (scores - min_score) / (max_score - min_score)
 
-        # Normalize to probabilities
-        probabilities = transformed_scores / np.sum(transformed_scores)
+            # Exaggerate differences with a temperature-controlled exponential
+            exp_scores = np.exp(norm_scores * scale)
+            probabilities = exp_scores / np.sum(exp_scores)
 
         # Add to db
         square_choice_list = []
