@@ -73,7 +73,7 @@ def main():
             """SQUARE PREDICTION
             """
             prediction_d = env.predict_square_energy_change(i, subject)
-            chosen_id = int(env.choose_square(prediction_d, env))
+            chosen_id = int(env.choose_square(i, subject_id, prediction_d, env))
             if chosen_id is None: continue  # Skip turn if no unoccupied squares available
 
             # Process new square movement

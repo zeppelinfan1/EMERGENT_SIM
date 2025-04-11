@@ -465,7 +465,7 @@ class Environment:
 
         return prediction_d
 
-    def choose_square(self, prediction_d, env, scale=2.0):
+    def choose_square(self, i, subject_id, prediction_d, env, scale=2.0):
 
         # Filter to only unoccupied squares
         available = {
@@ -489,6 +489,19 @@ class Environment:
 
         # Normalize to probabilities
         probabilities = transformed_scores / np.sum(transformed_scores)
+
+        # Add to db
+        square_choice_list = []
+        for square_id, prob in zip(square_ids, probabilities):
+
+            square_choice_list.append({
+                "iteration": i,
+                "subject_id": int(subject_id),
+                "square_id": int(square_id),
+                "choice": float(prob)
+            })
+
+        self.db.insert_mysql_bulk(table_name="square_choice", data=square_choice_list)
 
         # Choose one square based on transformed probabilities
         return np.random.choice(square_ids, p=probabilities)
