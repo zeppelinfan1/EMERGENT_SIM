@@ -76,11 +76,14 @@ def main():
             chosen_id = int(env.choose_square(i, subject_id, prediction_d, env))
             if chosen_id is None: continue  # Skip turn if no unoccupied squares available
 
+            # Determine path and next square
+            new_square = env.find_path(perceivable_env, prediction_d)
+
             # Process new square movement
-            new_square = env.square_map[chosen_id]
-            square.subject = None
-            new_square.subject = subject
-            env.current_subject_dict[subject.id] = chosen_id
+            # new_square = env.square_map[chosen_id]
+            # square.subject = None
+            # new_square.subject = subject
+            # env.current_subject_dict[subject.id] = chosen_id
             # print(f"Subject: {subject.id} moved from square {square.id} to {new_square.id}.")
 
         # Update database

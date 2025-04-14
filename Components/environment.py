@@ -508,6 +508,10 @@ class Environment:
         # Choose one square based on transformed probabilities
         return np.random.choice(square_ids, p=probabilities)
 
+    def find_path(self, env, pred_d):
+
+        pass
+
     def display(self):
 
         # Prints the environment, showing 'H' for holes and 'L' for land
