@@ -465,7 +465,7 @@ class Environment:
 
         return prediction_d
 
-    def choose_square(self, i, subject_id, prediction_d, env, scale=2.0):
+    def main_objective_choice(self, i, subject, prediction_d, env, scale=2.0):
 
         # Filter to only unoccupied squares
         available = {
@@ -498,15 +498,23 @@ class Environment:
 
             square_choice_list.append({
                 "iteration": i,
-                "subject_id": int(subject_id),
+                "subject_id": int(subject.id),
                 "square_id": int(square_id),
                 "choice": float(prob)
             })
 
         self.db.insert_mysql_bulk(table_name="square_choice", data=square_choice_list)
 
-        # Choose one square based on transformed probabilities
-        return np.random.choice(square_ids, p=probabilities)
+        # Make random choice
+        choice = np.random.choice(square_ids, p=probabilities)
+        choice_prob = available.get(choice)
+
+        # Compare to main objective
+        if not subject.objective_dict: # If no existing objective
+            subject.objective_dict[choice] = choice_prob
+
+
+
 
     def find_path(self, env, pred_d):
 
