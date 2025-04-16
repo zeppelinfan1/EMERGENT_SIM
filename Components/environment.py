@@ -465,7 +465,7 @@ class Environment:
 
         return prediction_d
 
-    def main_objective_choice(self, i, subject, prediction_d, env, scale=2.0):
+    def main_objective_choice(self, i, subject, prediction_d, env, scale=2.0) -> None:
 
         # Filter to only unoccupied squares
         available = {
@@ -512,13 +512,18 @@ class Environment:
         # Compare to main objective
         if not subject.objective_dict: # If no existing objective
             subject.objective_dict[choice] = choice_prob
+        elif choice_prob > max([val for key, val in subject.objective_dict.items()]): # Update objective
+            subject.objective_dict.clear()
+            subject.objective_dict[choice] = choice_prob
 
+    def find_path(self, subject, env, pred_d):
 
-
-
-    def find_path(self, env, pred_d):
-
+        # Find initial location
         pass
+        # Find final destination
+        pass
+
+
 
     def display(self):
 
