@@ -512,7 +512,7 @@ class Environment:
         # Compare to main objective
         if not subject.objective_dict: # If no existing objective
             subject.objective_dict[choice] = choice_prob
-        elif choice_prob > max([val for key, val in subject.objective_dict.items()]): # Update objective
+        elif choice_prob > max(subject.objective_dict.values()): # Update objective
             subject.objective_dict.clear()
             subject.objective_dict[choice] = choice_prob
 
