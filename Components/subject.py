@@ -120,6 +120,8 @@ class Subject:
     energy_change: int = 0
     energy: int = 100
     genetics: Genetics = field(init=False) # Created in post init
+    # Objective dict
+    objective_dict: dict = field(default_factory=dict)
     # Features network paramaters
     feature_embedding_length: int = 5 # Length of 3 for embeddings + 1 for numerous_features + 1 personal/observed = 5
     feature_embeddings: dict = field(default_factory=dict)
