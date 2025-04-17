@@ -76,7 +76,7 @@ def main():
             env.main_objective_choice(i, subject, prediction_d, env)
 
             # Determine path and next square
-            new_square = env.find_path(subject, perceivable_env, prediction_d)
+            new_square = env.find_path(subject, prediction_d)
 
             # Process new square movement
             # new_square = env.square_map[chosen_id]

@@ -516,12 +516,22 @@ class Environment:
             subject.objective_dict.clear()
             subject.objective_dict[choice] = choice_prob
 
-    def find_path(self, subject, env, pred_d):
+    def next_square(self, current_square_id, final_square_id, pred_d):
+
+        pass
+
+    def find_path(self, subject, pred_d):
 
         # Find initial location
-        pass
+        initial_square_id = self.current_subject_dict.get(subject.id)
         # Find final destination
-        pass
+        final_square_id = max(subject.objective_dict, key=subject.objective_dict.get)
+
+        # Calculate distance delta
+        current_square_id = initial_square_id
+        while current_square_id != final_square_id:
+
+            self.next_square(current_square_id, final_square_id, pred_d)
 
 
 
