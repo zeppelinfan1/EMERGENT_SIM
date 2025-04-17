@@ -518,7 +518,32 @@ class Environment:
 
     def next_square(self, current_square_id, final_square_id, pred_d):
 
-        pass
+        current = self.square_map[current_square_id].position
+        target = self.square_map[final_square_id].position
+
+        dx = target.x - current.x
+        dy = target.y - current.y
+
+        options = []
+        # Primary directions (toward the goal)
+        primary_moves = [(current.x + dx, current.y), (current.x, current.y + dy)]
+        # Secondary (diagonal and alternative) directions
+        secondary_moves = [
+            (current.x + dx, current.y + dy),
+            (current.x - dx, current.y),
+            (current.x, current.y - dy)]
+
+        for x, y in primary_moves + secondary_moves:
+
+            if self.check_is_within_bounds(x, y):
+                square = self.get_square(x, y)
+                if square.subject is None:
+                    score = pred_d.get(square.id, 0)
+                    options.append((square.id, score))
+
+        if not options: return current_square_id  # No movement possible
+
+        return max(options, key=lambda x: x[1])[0]
 
     def find_path(self, subject, pred_d):
 
@@ -528,12 +553,9 @@ class Environment:
         final_square_id = max(subject.objective_dict, key=subject.objective_dict.get)
 
         # Calculate distance delta
-        current_square_id = initial_square_id
-        while current_square_id != final_square_id:
+        next_square = self.next_square(initial_square_id, final_square_id, pred_d)
 
-            self.next_square(current_square_id, final_square_id, pred_d)
-
-
+        return next_square
 
     def display(self):
 

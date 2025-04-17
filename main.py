@@ -76,13 +76,13 @@ def main():
             env.main_objective_choice(i, subject, prediction_d, env)
 
             # Determine path and next square
-            new_square = env.find_path(subject, prediction_d)
+            chosen_id = env.find_path(subject, prediction_d)
 
             # Process new square movement
-            # new_square = env.square_map[chosen_id]
-            # square.subject = None
-            # new_square.subject = subject
-            # env.current_subject_dict[subject.id] = chosen_id
+            new_square = env.square_map[chosen_id]
+            square.subject = None
+            new_square.subject = subject
+            env.current_subject_dict[subject.id] = chosen_id
             # print(f"Subject: {subject.id} moved from square {square.id} to {new_square.id}.")
 
         # Update database
