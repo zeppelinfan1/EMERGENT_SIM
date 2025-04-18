@@ -5,7 +5,7 @@ from Components.db_api import DB_API
 MAX_ITERATIONS = 100
 ENV_HEIGHT = 50
 ENV_WIDTH = 20
-SUBJECT_NUM = 10
+SUBJECT_NUM = 1
 SUBJECT_GENE_NUM = 8
 SUBJECT_GENE_LEN = 10
 SUBJECT_PERCEPTION_RANGE = 3
@@ -77,13 +77,14 @@ def main():
 
             # Determine path and next square
             chosen_id = env.find_path(subject, prediction_d)
-
             # Process new square movement
             new_square = env.square_map[chosen_id]
             square.subject = None
             new_square.subject = subject
             env.current_subject_dict[subject.id] = chosen_id
-            # print(f"Subject: {subject.id} moved from square {square.id} to {new_square.id}.")
+            if chosen_id in subject.objective_dict:
+                subject.objective_dict.pop(chosen_id)
+            print(f"Subject: {subject.id} moved from square {square.id} to {new_square.id}.")
 
         # Update database
         env.db.insert_mysql_bulk(table_name="current_positions", data=current_positions)
