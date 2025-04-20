@@ -2,10 +2,10 @@
 from Components.environment import Environment
 from Components.db_api import DB_API
 
-MAX_ITERATIONS = 100
+MAX_ITERATIONS = 1000
 ENV_HEIGHT = 50
 ENV_WIDTH = 20
-SUBJECT_NUM = 1
+SUBJECT_NUM = 10
 SUBJECT_GENE_NUM = 8
 SUBJECT_GENE_LEN = 10
 SUBJECT_PERCEPTION_RANGE = 3
