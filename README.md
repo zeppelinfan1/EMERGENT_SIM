@@ -31,3 +31,9 @@ Act by choosing a movement decision from the neural network’s output.
 A MySQL database stores perception data and past decisions.
 Subjects learn from both their own mistakes and those of others in their perception range.
 Every iteration, the database is updated with new experiences, which are used to train the neural network.
+
+
+
+Next steps...
+
+1) Incorporate genetics. Make it so that feature interaction is unique for each subject. Something that works for a subject will not work for another. And generate features organically so that every simulation is different.
