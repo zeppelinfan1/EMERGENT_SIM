@@ -70,11 +70,14 @@ def main():
             # Train
             subject.feature_network.train(X=pairs, y=pair_labels, epochs=1, batch_size=128)
 
-            """SQUARE PREDICTION
+            """SQUARE PREDICTION & MAIN OBJECTIVE
             """
             prediction_d = env.predict_square_energy_change(i, subject)
+            # Making choice for main objective - long term
             env.main_objective_choice(i, subject, prediction_d, env)
 
+            """SHORT TERM PATH CHOICE & ACTION
+            """
             # Determine path and next square
             chosen_id = env.find_path(subject, prediction_d)
             # Process new square movement
