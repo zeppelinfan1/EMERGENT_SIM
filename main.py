@@ -27,7 +27,7 @@ def main():
         """
         env.update_energy_change(i, verbage=True)
 
-        """LOOP THROUGH CURRENT SUBJECTS - SUBJECT DECISION MAKING PROCESS
+        """LOOP THROUGH CURRENT SUBJECTS & SUBJECT DECISION MAKING PROCESS
         """
         current_positions = []
         subject_environmental_memory = []
