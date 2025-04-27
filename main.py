@@ -2,7 +2,7 @@
 from Components.environment import Environment
 from Components.db_api import DB_API
 
-MAX_ITERATIONS = 1000
+MAX_ITERATIONS = 100
 ENV_HEIGHT = 50
 ENV_WIDTH = 20
 SUBJECT_NUM = 10
