@@ -384,6 +384,12 @@ class Environment:
             total_energy_change = 0
             for feature in features:
 
+                """GENETICS FACTOR PART
+                """
+
+
+
+                # Temporary
                 total_energy_change += feature.energy_change
 
                 if total_energy_change != 0: # Add feature to this later
