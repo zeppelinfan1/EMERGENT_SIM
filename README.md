@@ -36,4 +36,4 @@ Every iteration, the database is updated with new experiences, which are used to
 
 Next steps...
 
-1) Incorporate genetics. Make it so that feature interaction is unique for each subject. Something that works for a subject will not work for another. And generate features organically so that every simulation is different.
+1) How to make long term planning work? That way, objects can have a bad initial effect but payoff longterm. How to trace back the root cause of the payoff? How to attribute value to it?
