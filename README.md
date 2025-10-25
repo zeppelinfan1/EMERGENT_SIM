@@ -36,4 +36,16 @@ Every iteration, the database is updated with new experiences, which are used to
 
 Next steps...
 
-1) How to make long term planning work? That way, objects can have a bad initial effect but payoff longterm. How to trace back the root cause of the payoff? How to attribute value to it?
+1) Implement dual neural network solution.
+
+  Instead of a single network making all of the decisions, split the neural network brain into two parts.
+
+  First, the original "Awareness Lobe". Assesses what is currently happening. With the subject itself and with surroundings.
+
+  Second, the new "Decision Lobe". Long term history taken from the Awareness Lobe and then turning into long-term decision making and planning.
+
+2) Create conditions to promote the adaption of long-term planning.
+
+   Potentially, something that is slightly bad at first, but then yields long term results (the only way to survive long-term is to act this way).
+
+   Requires setting up interactions between objects/tools.. Expandind that functionality.
