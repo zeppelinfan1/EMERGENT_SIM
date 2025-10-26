@@ -42,7 +42,11 @@ Next steps...
 
   First, the original "Awareness Lobe". Assesses what is currently happening. With the subject itself and with surroundings.
 
+    How does this faciliate long term planning? What is the purspose of this? Why does it need a model when it is basically static stuff? Should it be static or open to interpretation?
+
   Second, the new "Decision Lobe". Long term history taken from the Awareness Lobe and then turning into long-term decision making and planning.
+
+    How does this factor in long term planning?
 
 2) Create conditions to promote the adaption of long-term planning.
 
