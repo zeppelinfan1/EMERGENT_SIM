@@ -4,6 +4,7 @@ import random
 from dataclasses import dataclass, field
 from pyspark.sql import SparkSession
 from Components.subject import Subject
+from Components.objects import Object
 from Components.db_api import DB_API
 
 # DATACLASSES
