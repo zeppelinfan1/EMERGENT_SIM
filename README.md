@@ -36,16 +36,30 @@ Every iteration, the database is updated with new experiences, which are used to
 
 Next steps...
 
-1) Implement dual neural network solution.
+Stage 0 – Scale up Feature functionality
 
-  Instead of a single network making all of the decisions, split the neural network brain into two parts.
+More defining characterists (variable?)
 
-  First, the original "Awareness Lobe". Assesses what is currently happening. With the subject itself and with surroundings.
+Interactions between features.
 
-  Second, the new "Decision Lobe". Long term history taken from the Awareness Lobe and then turning into long-term decision making and planning.
+Stage 1 – Perception
 
-2) Create conditions to promote the adaption of long-term planning.
+Use the contrastive neural network as the awareness module.
 
-   Potentially, something that is slightly bad at first, but then yields long term results (the only way to survive long-term is to act this way).
+Input: raw environmental and contextual data. 
 
-   Requires setting up interactions between objects/tools.. Expandind that functionality.
+Output: embeddings representing distinct perceptual states.
+
+Purpose: separate and cluster sensory patterns into meaningful latent structure.
+
+Stage 2 – Valuation
+
+Build a second model that assigns scalar value to each perceptual embedding.
+
+Input: embeddings from Stage 1.
+
+Output: numeric rating (e.g., –10 to +10).
+
+Purpose: encode immediate good/bad weighting of each perceived state.
+
+** Decouple Stage 1 and 2. The features of something shouldn't be tied to whether it is good or bad.
