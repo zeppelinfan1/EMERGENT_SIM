@@ -36,20 +36,25 @@ Every iteration, the database is updated with new experiences, which are used to
 
 Next steps...
 
-1) Implement dual neural network solution.
+Stage 1 – Perception
 
-  Instead of a single network making all of the decisions, split the neural network brain into two parts.
+Use the contrastive neural network as the awareness module.
 
-  First, the original "Awareness Lobe". Assesses what is currently happening. With the subject itself and with surroundings.
+Input: raw environmental and contextual data.
 
-    How does this faciliate long term planning? What is the purspose of this? Why does it need a model when it is basically static stuff? Should it be static or open to interpretation?
+Output: embeddings representing distinct perceptual states.
 
-  Second, the new "Decision Lobe". Long term history taken from the Awareness Lobe and then turning into long-term decision making and planning.
+Purpose: separate and cluster sensory patterns into meaningful latent structure.
 
-    How does this factor in long term planning?
+Stage 2 – Valuation
 
-2) Create conditions to promote the adaption of long-term planning.
+Build a second model that assigns scalar value to each perceptual embedding.
 
-   Potentially, something that is slightly bad at first, but then yields long term results (the only way to survive long-term is to act this way).
+Input: embeddings from Stage 1.
 
-   Requires setting up interactions between objects/tools.. Expandind that functionality.
+Output: numeric rating (e.g., –10 to +10).
+
+Purpose: encode immediate good/bad weighting of each perceived state.
+
+Stages 3 (memory) and 4 (planning) can later be added on top.
+For now, perfect Stage 1 and 2 integration so that every sensory embedding carries an associated value signal.
