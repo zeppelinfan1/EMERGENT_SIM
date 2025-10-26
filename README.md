@@ -36,11 +36,17 @@ Every iteration, the database is updated with new experiences, which are used to
 
 Next steps...
 
+Stage 0 – Scale up Feature functionality
+
+More defining characterists (variable?)
+
+Interactions between features.
+
 Stage 1 – Perception
 
 Use the contrastive neural network as the awareness module.
 
-Input: raw environmental and contextual data.
+Input: raw environmental and contextual data. 
 
 Output: embeddings representing distinct perceptual states.
 
@@ -56,5 +62,4 @@ Output: numeric rating (e.g., –10 to +10).
 
 Purpose: encode immediate good/bad weighting of each perceived state.
 
-Stages 3 (memory) and 4 (planning) can later be added on top.
-For now, perfect Stage 1 and 2 integration so that every sensory embedding carries an associated value signal.
+** Decouple Stage 1 and 2. The features of something shouldn't be tied to whether it is good or bad.
