@@ -1,13 +1,14 @@
 """
 OBJECT FUNCTIONALITY
-MAPPING - X and Y coordinates
-X coordinate determines energy drain (negative) / provide (positive)
-Y coordinate determines object destroy (negative) / create (positive)
-Example:
-(-1, -1) Drain and Destroy - Consumes a lot of energy and destroys an object
-(-1, 1) Drain and Create - Consumes a lot of energy and creates an object
-(1, -1) Provide and Destroy - Provides energy and destroys an object
-(1, 1) Provide and Create - Provides energy and creates an object
+Symbol	Domain	Function	Interpretation
+fx	Functional (X-axis)	Energy flow	Positive = provides energy to the actor; negative = drains actor energy.
+    Controls short-term energetic effect of interactions (fuel vs fatigue).
+fy	Functional (Y-axis)	Creation vs destruction	Positive = creates or constructs; negative = destroys or damages.
+    Determines whether an interaction builds or breaks entities.
+sx	Structural (X-axis)	Durability / resilience	Positive = resistant, hard to damage; negative = fragile, breaks easily.
+    Affects how much damage an object can take and how well it resists destruction.
+sy	Structural (Y-axis)	Production cost / complexity	Positive = expensive or energy-intensive to create or use; negative = cheap or efficient.
+    Modulates the energy cost of actions and potential trade value.
 """
 
 import numpy as np
@@ -37,26 +38,31 @@ class Object:
         self.id = Object.last_subject
 
         # Functional mapping: energy drain or provide (x) vs create or destory (y)
-        if self.fx is None or self.fy is None:
-            self.fx, self.fy = (random.random() * 2 - 1), (random.random() * 2 - 1)
+        if self.fx is None:
+            self.fx = random.random() * 2 - 1
+        if self.fy is None:
+            self.fy = random.random() * 2 - 1
         self.functional_map = (self.fx, self.fy)
-        self.fx, self.fy = self.functional_map
 
         # Structural mapping: durability (x) vs cost (y)
-        if self.sx is None or self.sy is None:
-            self.sx, self.sy = (random.random() * 2 - 1), (random.random() * 2 - 1)
+        if self.sx is None:
+            self.sx = random.random() * 2 - 1
+        if self.sy is None:
+            self.sy = random.random() * 2 - 1
         self.structural_map = (self.sx, self.sy)
-        self.sx, self.sy = self.structural_map
 
     def destroy(self, actor, target):
 
-        create_power = abs(self.fy)
-        energy_cost = create_power * (1 + max(0., self.sy))
+        power = abs(self.fy)
+        energy_cost = (
+                abs(self.fy) * (1.0 + max(0.0, self.sy))  # cost scales with destruction and cost axis
+                - self.fx  # offset by object’s energy contribution
+        )
 
         actor.energy -= energy_cost
 
         resistance = 1 - target.sx
-        target.durability -= create_power * resistance
+        target.durability -= power * resistance
 
         if target.durability <= 0:
             target.destroyed = True
