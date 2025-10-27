@@ -36,30 +36,4 @@ Every iteration, the database is updated with new experiences, which are used to
 
 Next steps...
 
-Stage 0 – Scale up Feature functionality
-
-More defining characterists (variable?)
-
-Interactions between features.
-
-Stage 1 – Perception
-
-Use the contrastive neural network as the awareness module.
-
-Input: raw environmental and contextual data. 
-
-Output: embeddings representing distinct perceptual states.
-
-Purpose: separate and cluster sensory patterns into meaningful latent structure.
-
-Stage 2 – Valuation
-
-Build a second model that assigns scalar value to each perceptual embedding.
-
-Input: embeddings from Stage 1.
-
-Output: numeric rating (e.g., –10 to +10).
-
-Purpose: encode immediate good/bad weighting of each perceived state.
-
-** Decouple Stage 1 and 2. The features of something shouldn't be tied to whether it is good or bad.
+Work on the subjects genetics methodology so that it influences object interactions..
