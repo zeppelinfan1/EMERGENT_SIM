@@ -35,7 +35,7 @@ class Genetics:
         val = int("".join(map(str, b)), 2)
         max_val = (1 << n) - 1
 
-        return -1.0 if max_val == 0 else (val / max_val) * 2.0 - 1.0 # In [-1, 1]
+        return (val / max_val) * 2.0 - 1.0 if max_val > 0 else 0.0
 
     def generate_gene(self):
 
@@ -47,13 +47,16 @@ class Genetics:
         mapping_list = []
         for gene in self.genes:
 
-            half = len(gene) // 2  # Split gene into two parts
-            x_bits = gene[:half]  # First half for X
-            y_bits = gene[half:]  # Second half for Y
+            n = len(gene)
+            seg = n // 3 or 1
+            x_bits = gene[:seg]
+            y_bits = gene[seg:2*seg]
+            z_bits = gene[2*seg:]
             # Mapping a binary gene to a Hilbert curve coordinate
             x_value = self.bits_to_unit(x_bits)
             y_value = self.bits_to_unit(y_bits)
-            mapping_list.append((x_value, y_value))
+            z_value = self.bits_to_unit(z_bits)
+            mapping_list.append((x_value, y_value, z_value))
 
         return mapping_list
 
