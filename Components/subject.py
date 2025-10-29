@@ -4,52 +4,9 @@ import random
 from dataclasses import dataclass, field
 from collections import OrderedDict
 import Components.network as nn
-import Components.mapping as mapping
+from Components.mapping import Mapping
+from Components.genetics import Genetics
 
-@dataclass
-class Genetics:
-
-    gene_number: int
-    gene_length: int
-    genes: list = field(init=False)
-    mapping: list = field(init=False)
-
-    def __post_init__(self):
-
-        # Binary array for each neuron
-        self.genes = [self.generate_gene() for _ in range(self.gene_number)]
-        # Mapping for each gene
-        self.mapping = self.generate_map()
-
-    def generate_gene(self):
-
-        # Random binary list
-        return [random.randint(0, 1) for _ in range(self.gene_length)]
-
-    def generate_map(self):
-
-        mapping_list = []
-        for gene in self.genes:
-
-            half = len(gene) // 2  # Split gene into two parts
-            x_binary = gene[:half]  # First half for X
-            y_binary = gene[half:]  # Second half for Y
-            # Mapping a binary gene to a Hilbert curve coordinate
-            x_decimal = int("".join(map(str, x_binary)), 2)
-            y_decimal = int("".join(map(str, y_binary)), 2)
-            max_value = (2 ** half) - 1  # Max value for scaling
-            x_value = (x_decimal / max_value) * 2 - 1
-            y_value = (y_decimal / max_value) * 2 - 1
-
-            mapping_list.append((x_value, y_value))
-
-        return mapping_list
-
-
-    def __repr__(self):
-
-        # Formats output
-        return f"Genetics(gene_number={self.gene_number}, gene_length={self.gene_length}, genes={self.genes}, mapping={self.mapping})"
 
 @dataclass
 class Memory:
@@ -110,15 +67,15 @@ class Memory:
 class Subject:
 
     id: int = field(init=False)
-    # Genetics information
-    gene_number: int
-    gene_length: int
     # Environmental related paramaters
-    perception_range: int
+    perception_range: int = 2
     env_memory: dict = field(default_factory=dict)
     # Subject paramaters
     energy_change: int = 0
     energy: int = 100
+    # Genetics information
+    gene_number: int = 3
+    gene_length: int = 6
     genetics: Genetics = field(init=False) # Created in post init
     # Objective dict
     objective_dict: dict = field(default_factory=dict)
@@ -126,7 +83,7 @@ class Subject:
     feature_embedding_length: int = 5 # Length of 3 for embeddings + 1 for numerous_features + 1 personal/observed = 5
     feature_embeddings: dict = field(default_factory=dict)
     feature_network: nn.Model = field(init=False)
-    feature_mapping: dict = field(default_factory=dict)
+    feature_mapping: Mapping = field(init=False)
     feature_memory: Memory = field(init=False)
 
     last_subject = 0
@@ -139,7 +96,7 @@ class Subject:
         # Network initialization
         self.feature_network = self.initialize_network()
         # Mapping
-        self.feature_mapping = mapping.Map()
+        self.feature_mapping = Mapping()
         # Memory
         self.feature_memory = Memory()
 
@@ -188,7 +145,7 @@ class Subject:
 
 if __name__ == "__main__":
 
-    subject1 = Subject(gene_number=6, gene_length=10, perception_range=2)
+    subject1 = Subject()
     subject1.generate_new_embedding(name="TEST", length=3)
-    print(subject1.feature_embeddings)
+    print(subject1)
 

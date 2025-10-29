@@ -1,6 +1,6 @@
 import numpy as np
 
-class Map:
+class Mapping:
 
     def __init__(self, embedding_dim=4, decay_rate=0.95):
 
@@ -48,7 +48,8 @@ class Map:
         return score  # Output is between 0 (bad) and 1 (good)
 
 
-
+if __name__ == "__main__":
+    map = Mapping()
 
 
 

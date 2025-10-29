@@ -1,5 +1,5 @@
 import numpy as np
-from Components.mapping import Map
+from Components.mapping import Mapping
 
 
 # Dense layer
@@ -1139,7 +1139,7 @@ if __name__ == "__main__":
     embeddings_test = np.array(embeddings_test)  # Shape (60, 3)
 
     # Create instance of embedding heatmap
-    map = Map()
+    map = Mapping()
 
     # Update new points into map
     for i in range(len(X)):
@@ -1182,7 +1182,7 @@ if __name__ == "__main__":
     embeddings_test = np.array(embeddings_test)  # Shape (60, 3)
 
     # Create instance of embedding heatmap
-    map = Map()
+    map = Mapping()
 
     # Update new points into map
     for i in range(len(X)):

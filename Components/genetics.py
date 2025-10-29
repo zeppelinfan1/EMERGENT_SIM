@@ -6,25 +6,66 @@ Actions are associated with various properties within the ecosystem.
 
 # IMPORTS
 import numpy as np
+import random
+from dataclasses import dataclass, field
 
 
 # OBJECTS
-class Gene:
+@dataclass
+class Genetics:
 
-    def __init__(self):
+    gene_number: int
+    gene_length: int
+    genes: list = field(init=False)
+    mapping: list = field(init=False)
 
-        # Constants
-        self.length = 10
+    def __post_init__(self):
 
-    def build(self) -> str:
+        # Binary array for each neuron
+        self.genes = [self.generate_gene() for _ in range(self.gene_number)]
+        # Mapping for each gene
+        self.mapping = self.generate_map()
 
-        # Random binary string
-        gene = "".join(np.random.randint(low=0, high=2, size=self.length).astype(str))
+    @staticmethod
+    def bits_to_unit(b):
 
-        return gene
+        n = len(b)
+        if n == 0:
+            return 0.0
+        val = int("".join(map(str, b)), 2)
+        max_val = (1 << n) - 1
+
+        return -1.0 if max_val == 0 else (val / max_val) * 2.0 - 1.0 # In [-1, 1]
+
+    def generate_gene(self):
+
+        # Random binary list
+        return [random.randint(0, 1) for _ in range(self.gene_length)]
+
+    def generate_map(self):
+
+        mapping_list = []
+        for gene in self.genes:
+
+            half = len(gene) // 2  # Split gene into two parts
+            x_bits = gene[:half]  # First half for X
+            y_bits = gene[half:]  # Second half for Y
+            # Mapping a binary gene to a Hilbert curve coordinate
+            x_value = self.bits_to_unit(x_bits)
+            y_value = self.bits_to_unit(y_bits)
+            mapping_list.append((x_value, y_value))
+
+        return mapping_list
+
+
+    def __repr__(self):
+
+        # Formats output
+        return f"Genetics(gene_number={self.gene_number}, gene_length={self.gene_length}, genes={self.genes}, mapping={self.mapping})"
 
 
 # RUN
 if __name__ == "__main__":
-    gene = Gene()
-    gene.build()
+    gene = Genetics(gene_number=3, gene_length=6)
+    print(gene.genes)
+    print(gene.mapping)
