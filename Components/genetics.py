@@ -139,7 +139,7 @@ class Genetics:
         efficiency = 1 / (1 + abs(centroid[1]))  # y centroid = metabolic cost
         aggression = np.sign(normal[1] + normal[2])  # orientation bias (Y,Z)
 
-        return {
+        parameters = {
             "strength": strength,
             "precision": precision,
             "stability": stability,
@@ -150,6 +150,8 @@ class Genetics:
             "edge_max": edge_max,
             "area": area
         }
+
+        return parameters
 
     def generate_gene(self):
 

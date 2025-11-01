@@ -67,24 +67,27 @@ class Memory:
 @dataclass
 class Subject(Entity):
 
-    # Environmental related paramaters
-    perception_range: int = 2
-    env_memory: dict = field(default_factory=dict)
     # Subject paramaters
-    energy_change: int = 0
     energy: int = 100
+
     # Genetics information
     gene_number: int = 3
     gene_length: int = 6
     genetics: Genetics = field(init=False) # Created in post init
+
     # Objective dict
-    objective_dict: dict = field(default_factory=dict)
+    # objective_dict: dict = field(default_factory=dict)
+
+    # Environmental related paramaters
+    # perception_range: int = 2
+    # env_memory: dict = field(default_factory=dict)
+
     # Features network paramaters
-    feature_embedding_length: int = 5 # Length of 3 for embeddings + 1 for numerous_features + 1 personal/observed = 5
-    feature_embeddings: dict = field(default_factory=dict)
-    feature_network: nn.Model = field(init=False)
-    feature_mapping: Mapping = field(init=False)
-    feature_memory: Memory = field(init=False)
+    # feature_embedding_length: int = 5 # Length of 3 for embeddings + 1 for numerous_features + 1 personal/observed = 5
+    # feature_embeddings: dict = field(default_factory=dict)
+    # feature_network: nn.Model = field(init=False)
+    # feature_mapping: Mapping = field(init=False)
+    # feature_memory: Memory = field(init=False)
 
     def __post_init__(self):
         
@@ -93,12 +96,14 @@ class Subject(Entity):
         self.entity_id = 1 # Subject
         # Genetics
         self.genetics = Genetics(gene_number=self.gene_number, gene_length=self.gene_length)
+        self.parameters = Genetics.interpret_genetics(self.genetics)
+
         # Network initialization
-        self.feature_network = self.initialize_network()
+        # self.feature_network = self.initialize_network()
         # Mapping
-        self.feature_mapping = Mapping()
+        # self.feature_mapping = Mapping()
         # Memory
-        self.feature_memory = Memory()
+        # self.feature_memory = Memory()
 
     def generate_new_embedding(self, name, length=3):
 
@@ -146,6 +151,12 @@ class Subject(Entity):
 if __name__ == "__main__":
 
     subject1 = Subject()
-    subject1.generate_new_embedding(name="TEST", length=3)
-    print(subject1)
+    print(subject1.parameters)
+    subject2 = Subject()
+
+    from Components.objects import Object
+    object1 = Object()
+
+    from Components.actions import Action
+    Action.destory(subject1, subject2)
 

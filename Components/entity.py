@@ -10,6 +10,7 @@ class Entity:
     entity_id: int = field(init=False)
     # Physical stats
     durability: float = 100.0
+    parameters: dict = field(init=False)
     # State
     is_desroyed: bool = False
     # ID set

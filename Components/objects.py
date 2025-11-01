@@ -22,39 +22,29 @@ from Components.entity import Entity
 @dataclass
 class Object(Entity):
 
-    fx: float = None
-    fy: float = None
-    sx: float = None
-    sy: float = None
-
     def __post_init__(self):
 
         # Entity initialization
         super().__post_init__()
         self.entity_id = 2 # Object
-        # Functional mapping: energy drain or provide (x) vs create or destory (y)
-        if self.fx is None:
-            self.fx = random.random() * 2 - 1
-        if self.fy is None:
-            self.fy = random.random() * 2 - 1
-        self.functional_map = (self.fx, self.fy)
+        # Parameters
+        self.parameters = self.generate_parameters()
 
-        # Structural mapping: durability (x) vs cost (y)
-        if self.sx is None:
-            self.sx = random.random() * 2 - 1
-        if self.sy is None:
-            self.sy = random.random() * 2 - 1
-        self.structural_map = (self.sx, self.sy)
+    def generate_parameters(self) -> dict:
 
+        parameters = {
+            "strength": round(random.uniform(0.3, 1.0), 3),  # how hard the material is
+            "stability": round(random.uniform(0.2, 1.0), 3),  # internal cohesion
+            "edge_mean": round(random.uniform(0.5, 2.0), 3),  # average uniformity
+            "edge_var": round(random.uniform(0.0, 0.5), 3),  # irregularity (0=perfect)
+            "edge_max": round(random.uniform(1.0, 3.0), 3),  # maximum local defect
+            "area": round(random.uniform(0.5, 2.0), 3),  # size / contact area
+        }
+
+        return parameters
 
 if __name__ == "__main__":
     from Components.subject import Subject
-    subject1 = Subject(gene_number=6, gene_length=10, perception_range=2)
-    rock = Object(fy=-0.8, sx=0.5, sy=0.2)  # Moderate destroy ability, decent durability
-    tree = Object(sx=0.2, sy=-0.3 ) # Low durability
+    subject1 = Subject(gene_number=6, gene_length=10)
+    object1 = Object()
 
-    # simulate destruction
-    rock.destroy(actor=subject1, target=tree)
-
-    print(f"Agent energy: {subject1.energy:.2f}")
-    print(f"Tree destroyed? {tree.destroyed}")
