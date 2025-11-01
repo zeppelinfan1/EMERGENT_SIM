@@ -4,6 +4,7 @@ import random
 from dataclasses import dataclass, field
 from collections import OrderedDict
 import Components.network as nn
+from Components.entity import Entity
 from Components.mapping import Mapping
 from Components.genetics import Genetics
 
@@ -64,9 +65,8 @@ class Memory:
         return np.array(embeddings), np.array(labels)
 
 @dataclass
-class Subject:
+class Subject(Entity):
 
-    id: int = field(init=False)
     # Environmental related paramaters
     perception_range: int = 2
     env_memory: dict = field(default_factory=dict)
@@ -86,12 +86,12 @@ class Subject:
     feature_mapping: Mapping = field(init=False)
     feature_memory: Memory = field(init=False)
 
-    last_subject = 0
-
     def __post_init__(self):
-
-        Subject.last_subject += 1
-        self.id = Subject.last_subject
+        
+        # Entity initialization
+        super().__post_init__()
+        self.entity_id = 1 # Subject
+        # Genetics
         self.genetics = Genetics(gene_number=self.gene_number, gene_length=self.gene_length)
         # Network initialization
         self.feature_network = self.initialize_network()

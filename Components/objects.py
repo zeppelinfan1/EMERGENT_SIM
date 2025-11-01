@@ -14,29 +14,24 @@ sy	Structural (Y-axis)	Production cost / complexity	Positive = expensive or ener
 import numpy as np
 import random
 from dataclasses import dataclass, field
+from Components.entity import Entity
 
 
 
 
 @dataclass
-class Object:
+class Object(Entity):
 
-    id: int = field(init=False)
     fx: float = None
     fy: float = None
     sx: float = None
     sy: float = None
-    durability: float = 1.0
-    destroyed: bool = False
-
-    # For assigning id - will increment
-    last_subject = 0
 
     def __post_init__(self):
 
-        Object.last_subject += 1
-        self.id = Object.last_subject
-
+        # Entity initialization
+        super().__post_init__()
+        self.entity_id = 2 # Object
         # Functional mapping: energy drain or provide (x) vs create or destory (y)
         if self.fx is None:
             self.fx = random.random() * 2 - 1
@@ -50,62 +45,6 @@ class Object:
         if self.sy is None:
             self.sy = random.random() * 2 - 1
         self.structural_map = (self.sx, self.sy)
-
-    @staticmethod
-    def interpret_genetics(genetics):
-
-        """Combine genetics metrics into interpretable traits that can be used by any action.
-        """
-        g = genetics
-
-        # Edge statistics
-        length_values = [d for _, d in g.edge_lengths]
-        edge_mean = np.mean(length_values)
-        edge_var = np.var(length_values)
-        edge_max = np.max(length_values)
-
-        # Plane & axis metrics
-        area = g.plane_metrics["area"]
-        normal = g.plane_metrics["normal"]
-        centroid = g.plane_metrics["centroid"]
-        extents = g.axis_extents
-
-        # Derived, normalized traits
-        strength = extents[0] * (1 + area)  # raw destructive power
-        precision = 1 / (1 + edge_mean)  # smaller edge mean = more precise
-        stability = 1 / (1 + edge_var + abs(extents[2]))  # z-axis & var affect stability
-        efficiency = 1 / (1 + abs(centroid[1]))  # y centroid = metabolic cost
-        aggression = np.sign(normal[1] + normal[2])  # orientation bias (Y,Z)
-
-        return {
-            "strength": strength,
-            "precision": precision,
-            "stability": stability,
-            "efficiency": efficiency,
-            "aggression": aggression,
-            "edge_mean": edge_mean,
-            "edge_var": edge_var,
-            "edge_max": edge_max,
-            "area": area
-        }
-
-    def destroy(self, actor, target):
-
-        # Subject genetics modifiers
-        traits = self.interpret_genetics(actor.genetics)
-
-        base_power = abs(self.fy)
-        power = base_power * traits["strength"] * traits["precision"]
-        energy_cost = power * (1 + traits["edge_var"]) / traits["efficiency"]
-
-        actor.energy -= energy_cost
-        target.durability -= power * traits["stability"]
-
-        if target.durability <= 0:
-            target.destroyed = True
-            print(f"Subject: {actor.id} destroyed Object: {target.id}")
-        else:
-            print(f"Subject: {actor.id} damaged Object: {target.id}. Durability now {target.durability:.2f}")
 
 
 if __name__ == "__main__":

@@ -113,6 +113,44 @@ class Genetics:
             "plane_distance": plane_distance
         }
 
+    @staticmethod
+    def interpret_genetics(genetics):
+
+        """Combine genetics metrics into interpretable traits that can be used by any action.
+        """
+        g = genetics
+
+        # Edge statistics
+        length_values = [d for _, d in g.edge_lengths]
+        edge_mean = np.mean(length_values)
+        edge_var = np.var(length_values)
+        edge_max = np.max(length_values)
+
+        # Plane & axis metrics
+        area = g.plane_metrics["area"]
+        normal = g.plane_metrics["normal"]
+        centroid = g.plane_metrics["centroid"]
+        extents = g.axis_extents
+
+        # Derived, normalized traits
+        strength = extents[0] * (1 + area)  # raw destructive power
+        precision = 1 / (1 + edge_mean)  # smaller edge mean = more precise
+        stability = 1 / (1 + edge_var + abs(extents[2]))  # z-axis & var affect stability
+        efficiency = 1 / (1 + abs(centroid[1]))  # y centroid = metabolic cost
+        aggression = np.sign(normal[1] + normal[2])  # orientation bias (Y,Z)
+
+        return {
+            "strength": strength,
+            "precision": precision,
+            "stability": stability,
+            "efficiency": efficiency,
+            "aggression": aggression,
+            "edge_mean": edge_mean,
+            "edge_var": edge_var,
+            "edge_max": edge_max,
+            "area": area
+        }
+
     def generate_gene(self):
 
         # Random binary list
