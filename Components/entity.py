@@ -12,7 +12,7 @@ class Entity:
     durability: float = 100.0
     parameters: dict = field(init=False)
     # State
-    is_desroyed: bool = False
+    is_destroyed: bool = False
     # ID set
     _next_id: int = 0
 
