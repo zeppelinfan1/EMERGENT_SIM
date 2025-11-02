@@ -21,6 +21,20 @@ class Entity:
         Entity._next_id += 1
         self.id = Entity._next_id
 
+        # Default parameters
+        # Initialize neutral parameter dictionary (shared schema)
+        self.parameters = {
+            "strength": 0.0,
+            "precision": 0.0,
+            "stability": 0.0,
+            "efficiency": 0.0,
+            "aggression": 0.0,
+            "edge_mean": 0.0,
+            "edge_var": 0.0,
+            "edge_max": 0.0,
+            "area": 0.0,
+        }
+
 
 if __name__ == "__main__":
     e = Entity()
