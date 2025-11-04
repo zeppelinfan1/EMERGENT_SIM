@@ -91,7 +91,44 @@ class Action:
         func = getattr(Action, action, None)
         result = func(actor=actor, env=env, target=target)
 
-        print(result)
+        # Apply effects of result
+        self.apply(actor=actor, target=target, result=result)
+
+    def apply(self, actor: object, target: object, result: dict) -> None:
+
+        action = result.get("mode", "unknown").capitalize()
+        print(f"\n[Apply] Action mode: {action}")
+
+        # Actor effects
+        delta_e = result.get("actor_energy_delta", 0)
+        if hasattr(actor, "energy"):
+            prev_energy = actor.energy
+            actor.energy = max(0, actor.energy + delta_e)
+            print(f"Actor {actor.id}: Energy {prev_energy:.2f} → {actor.energy:.2f} (Δ {delta_e:.2f})")
+
+        # Target effects
+        delta_d = result.get("durability_delta", 0)
+        if hasattr(target, "durability"):
+            prev_dura = target.durability
+            target.durability = max(0, target.durability + delta_d)
+            print(f"Target {target.id}: Durability {prev_dura:.2f} → {target.durability:.2f} (Δ {delta_d:.2f})")
+
+            # Destruction check
+            if target.durability <= 0 and not target.is_destroyed:
+                target.is_destroyed = True
+                print(f"Target {target.id} has been destroyed.")
+
+        # Additional data
+        net_force = result.get("net_force")
+        if net_force is not None:
+            print(f"Net force: {net_force:.3f}")
+
+        power = result.get("power")
+        resistance = result.get("resistance")
+        if power is not None and resistance is not None:
+            print(f"Power: {power:.3f} | Resistance: {resistance:.3f}")
+
+        print("[Apply] Effects applied successfully.")
 
 
 if __name__ == "__main__":
