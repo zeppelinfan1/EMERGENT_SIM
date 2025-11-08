@@ -64,17 +64,137 @@ class Action:
     @staticmethod
     def create(actor, env, target=None):
 
-        pass
+        """
+        Actor converts energy into structure.
+        If target is None, creates a new object in the environment.
+        """
+
+        if target is None:
+            if env is None:
+                raise ValueError("Environment instance required for untargeted create().")
+            new_obj = env.spawn_object()
+            energy_cost = random.uniform(-5.0, -10.0)
+            return {
+                "actor": actor,
+                "target": new_obj,
+                "actor_energy_delta": energy_cost,
+                "durability_delta": 0,
+                "mode": "untargeted",
+            }
+
+        a, t = actor.parameters, target.parameters
+        efficiency = a["efficiency"]
+        stability = a["stability"]
+        precision = a["precision"]
+
+        resistance = (t["edge_mean"] + t["edge_var"]) / 2
+        power = (efficiency + stability + precision) / 3
+        noise = random.uniform(0.9, 1.1)
+        net = (power - resistance) * noise
+
+        if net > 0:
+            durability_delta = net * 10
+            actor_energy_delta = -durability_delta * 0.4
+        else:
+            durability_delta = 0
+            actor_energy_delta = -abs(net) * 5
+
+        return {
+            "actor": actor,
+            "target": target,
+            "actor_energy_delta": actor_energy_delta,
+            "durability_delta": durability_delta,
+            "mode": "targeted",
+            "power": power,
+            "resistance": resistance,
+            "net_force": net,
+        }
 
     @staticmethod
     def consume(actor, env, target=None):
 
-        pass
+        """
+        Actor transfers its own energy to strengthen target durability.
+        Untargeted: self-repair.
+        """
+
+        if target is None:
+            target = actor  # self-consume (repair)
+
+        a, t = actor.parameters, target.parameters
+        efficiency = a["efficiency"]
+        strength = a["strength"]
+        stability = t["stability"]
+
+        power = (efficiency + strength) / 2
+        resistance = stability
+        noise = random.uniform(0.9, 1.1)
+        net = (power - resistance) * noise
+
+        if net > 0:
+            durability_delta = net * 5
+            actor_energy_delta = -durability_delta * 0.6
+        else:
+            durability_delta = 0
+            actor_energy_delta = -abs(net) * 3
+
+        return {
+            "actor": actor,
+            "target": target,
+            "actor_energy_delta": actor_energy_delta,
+            "durability_delta": durability_delta,
+            "mode": "targeted" if target != actor else "untargeted",
+            "power": power,
+            "resistance": resistance,
+            "net_force": net,
+        }
 
     @staticmethod
     def produce(actor, env, target=None):
 
-        pass
+        """
+        Actor extracts energy from target or environment.
+        Untargeted: passive energy absorption.
+        """
+
+        if target is None:
+            energy_gain = random.uniform(1.0, 3.0)
+            return {
+                "actor": actor,
+                "target": None,
+                "actor_energy_delta": energy_gain,
+                "durability_delta": 0,
+                "mode": "untargeted",
+            }
+
+        a, t = actor.parameters, target.parameters
+        efficiency = a["efficiency"]
+        precision = a["precision"]
+        strength = t["strength"]
+        stability = t["stability"]
+
+        power = (efficiency + precision) / 2
+        resistance = (strength + stability) / 2
+        noise = random.uniform(0.9, 1.1)
+        net = (power - resistance) * noise
+
+        if net > 0:
+            energy_gain = net * 10
+            durability_delta = -net * 5
+        else:
+            energy_gain = 0
+            durability_delta = 0
+
+        return {
+            "actor": actor,
+            "target": target,
+            "actor_energy_delta": energy_gain,
+            "durability_delta": durability_delta,
+            "mode": "targeted",
+            "power": power,
+            "resistance": resistance,
+            "net_force": net,
+        }
 
     @classmethod
     def available_actions(cls):
