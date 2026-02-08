@@ -11,4 +11,9 @@ General sequence:
 - Subject chooses an action within it's personal bounds (ActionSpace).. at first randomly.
 - Performance varies below the maximum potential depending on parameters (maybe? keep it simple at first).. separate capability/potential from performance.
 - Actions MUST have consequences. Consequences are derived from the ActionSpace but monitored through...????... need to figure this out. I don't like the idea of Health/Vitality/Mana, etc.
-- Also... Product What??? Need to be able to create new objects.. And then, how is Create different from Produce? How to do all of these actions distinctly and emergently?
+- Also... note..
+
+Create - New structure
+Destory - Damage structre
+Consume - Receive value into actor
+Produce - Give value from actor
