@@ -157,6 +157,6 @@ if __name__ == "__main__":
     from Components.objects import Object
     object1 = Object()
 
-    from Components.actions import Action
+    from Components.actions_original import Action
     Action.destory(subject1, subject2)
 
