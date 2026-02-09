@@ -47,4 +47,5 @@ if __name__ == "__main__":
     from Components.subject import Subject
     subject1 = Subject(gene_number=6, gene_length=10)
     object1 = Object()
+    print(object1)
 

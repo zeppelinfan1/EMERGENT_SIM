@@ -10,182 +10,86 @@ import random, math
 from dataclasses import dataclass, field
 
 
+
 # OBJECTS
-@dataclass
+@dataclass(frozen=True)
 class Genetics:
 
     gene_number: int
     gene_length: int
     genes: list = field(init=False)
-    mapping: list = field(init=False)
-    # Gene metrics
-    edge_lengths: list = field(init=False)
-    axis_extents: tuple = field(init=False)
-    plane_metrics: dict = field(init=False)
+    genetic_projection: dict = field(init=False)
 
     def __post_init__(self):
 
-        # Binary array for each neuron
-        self.genes = [self.generate_gene() for _ in range(self.gene_number)]
-        # Mapping for each gene
-        self.mapping = self.generate_map()
-        # Metrics
-        self.edge_lengths = self.pairwise_edges(self.mapping)
-        self.axis_extents = self.axis_extents_fn(self.mapping)
-        self.plane_metrics = self.plane_metrics_from_points(self.mapping)
+        # Each gene is a binary array which will determine action's performance
+        genes = [self.generate_genes() for _ in range(self.gene_number)]
+        object.__setattr__(self, "genes", genes)
+        # How genetics are interpretted by the Actions plane - genetic Projection
+        genetic_projection = self.generate_projections()
+        object.__setattr__(self, "genetic_projection", genetic_projection)
 
     @staticmethod
-    def bits_to_unit(b):
+    def bits_to_value(bits):
 
-        n = len(b)
-        if n == 0:
+        if not bits:
             return 0.0
-        val = int("".join(map(str, b)), 2)
-        max_val = (1 << n) - 1
+        # interpret as signed integer centered at 0
+        val = int("".join(map(str, bits)), 2)
+        mid = (1 << len(bits)) / 2
 
-        return (val / max_val) * 2.0 - 1.0 if max_val > 0 else 0.0
-
-    @staticmethod
-    def pairwise_edges(points):
-
-        n = len(points)
-        edges = []
-        for i in range(n):
-
-            for j in range(i + 1, n):
-
-                xi, yi, zi = points[i]
-                xj, yj, zj = points[j]
-                d = math.sqrt((xi - xj) ** 2 + (yi - yj) ** 2 + (zi - zj) ** 2)
-                edges.append(((i, j), d))
-
-        return edges
+        return val - mid
 
     @staticmethod
-    def axis_extents_fn(points):
+    def gene_density(gx, gy, strength, x, y, spread: float=1):
 
-        arr = np.array(points)
-        min_vals = arr.min(axis=0)
-        max_vals = arr.max(axis=0)
+        # Contribution of a single gene at point (x, y)
+        dist_sq = (x - gx) ** 2 + (y - gy) ** 2
 
-        return tuple(max_vals - min_vals)
+        return abs(strength) * math.exp(-dist_sq / (2 * spread ** 2))
 
-    @staticmethod
-    def plane_metrics_from_points(points):
-
-        n = len(points)
-        if n < 3:
-            return {"normal": (0, 0, 0), "area": 0, "centroid": (0, 0, 0), "plane_distance": 0}
-
-        # centroid
-        cx = sum(p[0] for p in points) / n
-        cy = sum(p[1] for p in points) / n
-        cz = sum(p[2] for p in points) / n
-        centroid = (cx, cy, cz)
-
-        # build normal by summing cross products of consecutive edges
-        nx = ny = nz = 0.0
-        area_sum = 0.0
-        p0 = points[0]
-        for i in range(1, n - 1):
-            a = [points[i][j] - p0[j] for j in range(3)]
-            b = [points[i + 1][j] - p0[j] for j in range(3)]
-            # cross product
-            cxp = [a[1] * b[2] - a[2] * b[1],
-                   a[2] * b[0] - a[0] * b[2],
-                   a[0] * b[1] - a[1] * b[0]]
-            nx += cxp[0]
-            ny += cxp[1]
-            nz += cxp[2]
-            area_sum += math.sqrt(cxp[0] ** 2 + cxp[1] ** 2 + cxp[2] ** 2) / 2
-
-        norm = math.sqrt(nx ** 2 + ny ** 2 + nz ** 2)
-        if norm != 0:
-            nx /= norm
-            ny /= norm
-            nz /= norm
-        plane_distance = abs(nx * p0[0] + ny * p0[1] + nz * p0[2])
-
-        return {
-            "normal": (nx, ny, nz),
-            "area": area_sum,
-            "centroid": centroid,
-            "plane_distance": plane_distance
-        }
-
-    @staticmethod
-    def interpret_genetics(genetics):
-
-        """Combine genetics metrics into interpretable traits that can be used by any action.
-        """
-        g = genetics
-
-        # Edge statistics
-        length_values = [d for _, d in g.edge_lengths]
-        edge_mean = np.mean(length_values)
-        edge_var = np.var(length_values)
-        edge_max = np.max(length_values)
-
-        # Plane & axis metrics
-        area = g.plane_metrics["area"]
-        normal = g.plane_metrics["normal"]
-        centroid = g.plane_metrics["centroid"]
-        extents = g.axis_extents
-
-        # Derived, normalized traits
-        strength = extents[0] * (1 + area)  # raw destructive power
-        precision = 1 / (1 + edge_mean)  # smaller edge mean = more precise
-        stability = 1 / (1 + edge_var + abs(extents[2]))  # z-axis & var affect stability
-        efficiency = 1 / (1 + abs(centroid[1]))  # y centroid = metabolic cost
-        aggression = np.sign(normal[1] + normal[2])  # orientation bias (Y,Z)
-
-        parameters = {
-            "strength": strength,
-            "precision": precision,
-            "stability": stability,
-            "efficiency": efficiency,
-            "aggression": aggression,
-            "edge_mean": edge_mean,
-            "edge_var": edge_var,
-            "edge_max": edge_max,
-            "area": area
-        }
-
-        return parameters
-
-    def generate_gene(self):
+    def generate_genes(self):
 
         # Random binary list
         return [random.randint(0, 1) for _ in range(self.gene_length)]
 
-    def generate_map(self):
+    def generate_projections(self):
 
-        mapping_list = []
-        for gene in self.genes:
+        projection_dict = {}
+        for i, gene in enumerate(self.genes):
 
             n = len(gene)
             seg = n // 3 or 1
+
+            # Split gene into segments
             x_bits = gene[:seg]
             y_bits = gene[seg:2*seg]
             z_bits = gene[2*seg:]
-            # Mapping a binary gene to a Hilbert curve coordinate
-            x_value = self.bits_to_unit(x_bits)
-            y_value = self.bits_to_unit(y_bits)
-            z_value = self.bits_to_unit(z_bits)
-            mapping_list.append((x_value, y_value, z_value))
 
-        return mapping_list
+            # Putting each segment through the alogorithm
+            projection_dict[i] = {
+                "x": self.bits_to_value(x_bits), # X-coordinate
+                "y": self.bits_to_value(y_bits), # y-coordinate
+                "z": self.bits_to_value(z_bits), # Magnitude
+            }
 
-    def __repr__(self):
+        return projection_dict
 
-        # Formats output
-        return f"Genetics(gene_number={self.gene_number}, gene_length={self.gene_length}, genes={self.genes}, mapping={self.mapping})"
+    def density_at(self, x, y):
 
+        # Total genetic density at action coordinate (x, y)
+        total = 0.0
+        for g in self.genetic_projection.values():
+
+            total += self.gene_density(g["x"], g["y"], g["z"], x, y)
+
+        return total
 
 # RUN
 if __name__ == "__main__":
-    g = Genetics(gene_number=3, gene_length=6)
-    print("Mapping:", g.mapping)
-    print("Edges:", g.edge_lengths)
-    print("Axis extents:", g.axis_extents)
-    print("Plane metrics:", g.plane_metrics)
+    g = Genetics(gene_number=8, gene_length=10)
+    print(g.genetic_projection)
+    print(g.density_at(x=1, y=0))
+    # Step 1)
+    # Step 2) How genetic Projection values are aggregated into a single action's directional vector and magnitude (action Potential)
+    # Step 3) How action Performance (i.e. with variablility included) differs from the action Potential

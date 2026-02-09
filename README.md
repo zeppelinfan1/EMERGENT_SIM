@@ -1,19 +1,7 @@
-Last time: Created the ActionSpace class. 
-
-Next time: It needs to be linked to the subject, and initialized when the subject is created (i.e. create space). Save updating the space for later.
-
-After that... start working on how a subject can perform an action using that ActionSpace.
-
-
-General sequence:
-
-- Genetics is immutable, ActionSpace is mutable (changes over time depending on... things).
-- Subject chooses an action within it's personal bounds (ActionSpace).. at first randomly.
-- Performance varies below the maximum potential depending on parameters (maybe? keep it simple at first).. separate capability/potential from performance.
-- Actions MUST have consequences. Consequences are derived from the ActionSpace but monitored through...????... need to figure this out. I don't like the idea of Health/Vitality/Mana, etc.
-- Also... note..
-
-Create - New structure
-Destory - Damage structre
-Consume - Receive value into actor
-Produce - Give value from actor
+1. Test out how actions are impacted by the target (i.e. magnitudes pushing back on each other)
+2. Start thinking about objects... do they have genes? What are their characteristics?
+    a. Characteristics = Things like strength, health, speed, smart... NEED TO BE EMERGENT
+    b. How do subjects and objects differ in that regard?
+3. Build out basics in Entity/Subject/Object components
+4. Plan out how actions have effects (i.e. how the result of the action influences characteristics - increase/decrease)
+5. Finish the result of actions (i.e. actually creating/destroying/consume/produce... may need to impact more than just characteristics - like for create)

@@ -2,6 +2,8 @@ from dataclasses import dataclass, field
 from typing import Tuple
 
 
+"""NOTE: KEEP ALL HEALTH/MANA RELATED STUFF HERE"""
+
 @dataclass
 class Entity:
 
@@ -9,8 +11,8 @@ class Entity:
     # Type
     entity_id: int = field(init=False)
     # Physical stats
-    durability: float = 100.0
-    parameters: dict = field(init=False)
+    # durability: float = 100.0
+    # parameters: dict = field(init=False)
     # State
     is_destroyed: bool = False
     # ID set
@@ -23,17 +25,17 @@ class Entity:
 
         # Default parameters
         # Initialize neutral parameter dictionary (shared schema)
-        self.parameters = {
-            "strength": 0.0,
-            "precision": 0.0,
-            "stability": 0.0,
-            "efficiency": 0.0,
-            "aggression": 0.0,
-            "edge_mean": 0.0,
-            "edge_var": 0.0,
-            "edge_max": 0.0,
-            "area": 0.0,
-        }
+        # self.parameters = {
+        #     "strength": 0.0,
+        #     "precision": 0.0,
+        #     "stability": 0.0,
+        #     "efficiency": 0.0,
+        #     "aggression": 0.0,
+        #     "edge_mean": 0.0,
+        #     "edge_var": 0.0,
+        #     "edge_max": 0.0,
+        #     "area": 0.0,
+        # }
 
 
 if __name__ == "__main__":
