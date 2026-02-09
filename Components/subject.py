@@ -71,8 +71,8 @@ class Subject(Entity):
     energy: int = 100
 
     # Genetics information
-    gene_number: int = 3
-    gene_length: int = 6
+    gene_number: int = 6
+    gene_length: int = 10
     genetics: Genetics = field(init=False) # Created in post init
 
     # Objective dict
@@ -96,7 +96,6 @@ class Subject(Entity):
         self.entity_id = 1 # Subject
         # Genetics
         self.genetics = Genetics(gene_number=self.gene_number, gene_length=self.gene_length)
-        self.parameters = Genetics.interpret_genetics(self.genetics)
 
         # Network initialization
         # self.feature_network = self.initialize_network()
@@ -151,12 +150,14 @@ class Subject(Entity):
 if __name__ == "__main__":
 
     subject1 = Subject()
-    print(subject1.parameters)
-    subject2 = Subject()
+    print(subject1)
 
-    from Components.objects import Object
-    object1 = Object()
 
-    from Components.actions_original import Action
-    Action.destory(subject1, subject2)
+    # subject2 = Subject()
+    #
+    # from Components.objects import Object
+    # object1 = Object()
+    #
+    # from Components.actions_original import Action
+    # Action.destory(subject1, subject2)
 
