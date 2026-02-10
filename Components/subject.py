@@ -152,12 +152,3 @@ if __name__ == "__main__":
     subject1 = Subject()
     print(subject1)
 
-
-    # subject2 = Subject()
-    #
-    # from Components.objects import Object
-    # object1 = Object()
-    #
-    # from Components.actions_original import Action
-    # Action.destory(subject1, subject2)
-

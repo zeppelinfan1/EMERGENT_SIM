@@ -90,6 +90,4 @@ if __name__ == "__main__":
     g = Genetics(gene_number=8, gene_length=10)
     print(g.genetic_projection)
     print(g.density_at(x=1, y=0))
-    # Step 1)
-    # Step 2) How genetic Projection values are aggregated into a single action's directional vector and magnitude (action Potential)
     # Step 3) How action Performance (i.e. with variablility included) differs from the action Potential
