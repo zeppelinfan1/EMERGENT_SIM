@@ -12,7 +12,7 @@ sy	Structural (Y-axis)	Production cost / complexity	Positive = expensive or ener
 """
 
 import numpy as np
-import random
+import random, math
 from dataclasses import dataclass, field
 from Components.entity import Entity
 
@@ -28,24 +28,29 @@ class Object(Entity):
         super().__post_init__()
         self.entity_id = 2 # Object
         # Parameters
-        self.parameters = self.generate_parameters()
+        self.projection_n = 1
 
-    def generate_parameters(self) -> dict:
+    def generate_projections(self, max_dir=5.0, max_z=8.0):
 
-        parameters = {
-            "strength": round(random.uniform(0.3, 1.0), 3),  # how hard the material is
-            "stability": round(random.uniform(0.2, 1.0), 3),  # internal cohesion
-            "edge_mean": round(random.uniform(0.5, 2.0), 3),  # average uniformity
-            "edge_var": round(random.uniform(0.0, 0.5), 3),  # irregularity (0=perfect)
-            "edge_max": round(random.uniform(1.0, 3.0), 3),  # maximum local defect
-            "area": round(random.uniform(0.5, 2.0), 3),  # size / contact area
-        }
+        projection_dict = {}
+        for i in range(self.projection_n):
 
-        return parameters
+            theta = random.uniform(0, 2 * math.pi)
+            r = random.uniform(0.2, 1.0) * max_dir
+            x = math.cos(theta) * r
+            y = math.sin(theta) * r
+            z = random.uniform(-max_z, max_z)
+
+            # Putting each segment through the alogorithm
+            projection_dict[i] = {
+                "x": x,  # X-coordinate
+                "y": y,  # y-coordinate
+                "z": z,  # Magnitude
+            }
+
+        return projection_dict
 
 if __name__ == "__main__":
-    from Components.subject import Subject
-    subject1 = Subject(gene_number=6, gene_length=10)
     object1 = Object()
     print(object1)
 
